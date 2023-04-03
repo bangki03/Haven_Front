@@ -32,6 +32,7 @@ import MyPageProjectsView from '@/components/MyPageProjectsView.vue';
 import MyPageApplicationView from '@/components/MyPageApplicationView.vue';
 import MyPageNewsView from '@/components/MyPageNewsView.vue';
 import MyPageNotificationView from '@/components/MyPageNotificationView.vue';
+// import $ from 'jquery';
 
 export default {
   name: "MyPageView",
@@ -40,7 +41,36 @@ export default {
     MyPageApplicationView,
     MyPageNewsView,
     MyPageNotificationView
-  }
+  },
+  data() {
+    return {
+
+    }
+  },
+  methods: {
+    routespage() {
+      if (!this.$store.state.account.LoginActive) {
+        console.log("Please, Login First")
+        this.$router.push('/')
+      }
+    },
+
+    
+
+
+  },
+
+  mounted() {
+    this.routespage()
+  },
+
+  created() {
+  },
+
+  beforeUnmount() {
+
+  },
+
 }
 </script>
 

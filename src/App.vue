@@ -1,47 +1,18 @@
 <template>
-  <router-view  />
-  <!-- <LoginView :account="account"></LoginView> -->
+  <RouterView>  </RouterView>
 
-  <!-- <nav>
-    <router-link to="/">Home</router-link> |
-    <router-link to="/about">About</router-link>
-  </nav> -->
-  <!-- <div style="width: 98vw; height: 98vh; background-color: black;"> -->
-    <!-- <router-view /> -->
-  <!-- </div> -->
 </template>
 
 <script>
-// import LoginView from '@/views/LoginView.vue'
 
 export default{
   name: "app",
   components: {
-    // LoginView
+    
   },
-  // data() {
-  //   return{
-  //     account: {
-  //       LoginActive: false,
-  //       Email: "",
-  //       Id: "",
-  //     }
-  //   }
-  // },
-
-  methods: {
-    // routespage() {
-    //   if (this.account.LoginActive) {
-    //     this.$router.push('/mypage')
-    //   }
-      // else {
-      //   this.$router.push('/');
-      // }
-    // },
-  },
-
-  created() {
-    // this.routespage()
+  mounted() {
+    this.$store.commit('loadSessionStorageLogin')
+    console.log(this.$store.state.account)
   }
 }
 </script>

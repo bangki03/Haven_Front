@@ -1,5 +1,5 @@
 <template>
-  <LoginModal ></LoginModal>
+  <LoginModal></LoginModal>
   <div class="row" style="height: 100vh; width: 100vw; padding: 0.5em 0.5em; margin: 0 0; position: relative; background-color: #F8F9FA;">
     <div class="row" style="height: 50%; background-color: #BD7C4A; border-radius: 0.5em; margin: 0 auto;">
       <img
@@ -20,12 +20,34 @@
 <script>
 import LoginModal from "@/components/LoginModal.vue"
 
-export default {
-  name: "LoginView",
+export default{
   components: {
     LoginModal
   },
-  // props: [account],
+  data() {
+    return{
+    }
+  },
+
+  methods: {
+    routespage() {
+      if (this.$store.state.account.LoginActive) {
+        this.$router.push('/mypage')
+      }
+    },
+  },
+
+  mounted() {
+    this.$store.commit('loadSessionStorageLogin')
+    this.routespage()
+  },
+
+  created() {
+    
+  },
+
+  beforeUnmount() {
+  },
 }
 </script>
 

@@ -5,9 +5,11 @@
         <div v-if="!registerActive" class="login" v-bind:class="{ error: emptyFields }">
         <h1>Sign In</h1>
         <form class="form-group" @submit.prevent="doLogin">
-          <input v-model="account.email" type="email" class="form-control" placeholder="Email" required>
-          <input v-model="account.password" type="password" class="form-control" placeholder="Password" required>
-          <input type="submit" class="btn btn-primary" @click="doLogin">
+          <!-- <input v-model="prop_account.Email" type="email" class="form-control" placeholder="Email" required> -->
+          <input v-model="prop_account.Email" type="email" class="form-control" placeholder="Email" required>
+          <input v-model="prop_account.Password" type="password" class="form-control" placeholder="Password" required>
+          <!-- <input type="submit" class="btn btn-primary" @click="doLogin"> -->
+          <input type="submit" class="btn btn-primary">
 
           <p>Don't have an account? <a href="#" @click="registerActive = !registerActive, emptyFields = false">Sign up here</a>
           </p>
@@ -17,11 +19,14 @@
 
       <div v-else class="register" v-bind:class="{ error: emptyFields }">
         <h1>Sign Up</h1>
-        <form class="form-group">
-          <input v-model="emailReg" type="email" class="form-control" placeholder="Email" required>
-          <input v-model="passwordReg" type="password" class="form-control" placeholder="Password" required>
-          <input v-model="confirmReg" type="password" class="form-control" placeholder="Confirm Password" required>
-          <input type="submit" class="btn btn-primary" @click="doRegister">
+        <form class="form-group" @submit.prevent="doRegister">
+        <!-- <form class="form-group"> -->
+          <input v-model="reg_account.Email" type="email" class="form-control" placeholder="Email" required>
+          <input v-model="reg_account.Password" type="password" class="form-control" placeholder="Password" required>
+          <input v-model="reg_account.Password_confirm" type="password" class="form-control" placeholder="Confirm Password" required>
+          <input v-model="reg_account.PhoneNumber" type="tel" class="form-control" placeholder="Phone Number" required>
+          <!-- <input type="submit" class="btn btn-primary" @click="doRegister"> -->
+          <input type="submit" class="btn btn-primary">
 
           <p>Already have an account? <a href="#" @click="registerActive = !registerActive, emptyFields = false">Sign in here</a>
           </p>
@@ -39,30 +44,33 @@
 import $ from 'jquery';
 
 export default{
-  // props: [account],
+  props: ['account'],
   data() {
     return {
       registerActive: false,
-      account: {
-        email: "",
-        password: "",
+      prop_account: {
+        Email : "",
+        Password : "",
+        LoginActive : false,
       },
-      emailLogin: "",
-      passwordLogin: "",
-      emailReg: "",
-      passwordReg: "",
-      confirmReg: "",
+      reg_account: {
+        Email : "",
+        Password : "",
+        Password_confirm : "",
+        PhoneNumber : "",
+      },
       emptyFields: false
     }
   },
+  computed: {
+  },
   methods: {
     doLogin() {
-        if (this.account.email === "" || this.account.password === "") {
+        if (this.prop_account.email === "" || this.prop_account.password === "") {
             this.emptyFields = true;
         } 
         else {          
           this.get_Login()
-
         }
       },
       
@@ -70,10 +78,14 @@ export default{
         if (this.emailReg === "" || this.passwordReg === "" || this.confirmReg === "") {
           this.emptyFields = true;
         } else {
-          alert("You are now registered");
+          this.post_register_account()
         }
     },
 
+    // setLogin() {
+    //   this.prop_account.LoginActive = true;
+    //   this.$emit('setLogin', this.prop_account);
+    // },
 
     //  API 내놔~
     get_Login() {
@@ -82,13 +94,14 @@ export default{
           method: "GET",   // HTTP 요청 메소드(GET, POST 등)
           dataType: "json", // 서버에서 보내줄 데이터의 타입
           data: {
-              email: this.account.email,
-              password: this.account.password,
+              email: this.prop_account.Email,
+              password: this.prop_account.Password,
           },  // HTTP 요청과 함께 서버로 보낼 데이터
       })
       .then( data => {
           if(data.code == '200' && data.message=='login success'){
-            this.$router.push('/mypage')
+            this.get_UserID()
+            
           }
           else {
             alert('Login Failed')
@@ -96,15 +109,44 @@ export default{
       })
     },
 
+    get_UserID() {
+      $.ajax({
+          url: "http://183.105.120.175:30004/user", // 클라이언트가 HTTP 요청을 보낼 서버의 URL 주소
+          method: "GET",   // HTTP 요청 메소드(GET, POST 등)
+          dataType: "json", // 서버에서 보내줄 데이터의 타입
+          data: {
+              user_email: this.prop_account.Email,
+          },  // HTTP 요청과 함께 서버로 보낼 데이터
+      })
+      .then( data => {
+        this.$store.commit("setLogin", this.prop_account);
+        this.$store.commit("setUserID", data.id)
+        this.$store.commit("saveSessionStorageLogin")
+        console.log("Login")
+        this.$router.push('/mypage')
+      })
+    },
 
-    // post_account_login() {
-    //   fetch(this.API_List.robot_stop_sklee, {
-    //     method: "POST",
-    //     headers: {
-    //       "Content-Type": "application/json",
-    //     },
-    //   }).then((response) => console.log(response));
-    // },
+
+    post_register_account() {
+      fetch("http://183.105.120.175:30004/user", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: this.reg_account.Email,
+          password: this.reg_account.Password,
+          phone_number: this.reg_account.PhoneNumber,
+        }),
+      }).then( data => {
+        if(data.status == '200'){
+          alert("회원 가입 되었습니다. 다시 로그인 해주세요!");
+          this.$router.go();
+        }
+      });
+
+    },
 
     // put_deployed(item) {
     //   fetch(this.API_List.ai_model_deploy + String(item.id), {
@@ -138,6 +180,7 @@ export default{
     //   })
     // },
 
+    
   }
 }
 </script>
