@@ -2,6 +2,10 @@
 node_modules
 /dist
 
+# Test 파일
+dist.zip
+test_load.json
+test_save.json
 
 # local env files
 .env.local

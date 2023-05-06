@@ -22,6 +22,7 @@
         <form class="form-group" @submit.prevent="doRegister">
         <!-- <form class="form-group"> -->
           <input v-model="reg_account.Email" type="email" class="form-control" placeholder="Email" required>
+          <input v-model="reg_account.Name" type="name" class="form-control" placeholder="Name" required>
           <input v-model="reg_account.Password" type="password" class="form-control" placeholder="Password" required>
           <input v-model="reg_account.Password_confirm" type="password" class="form-control" placeholder="Confirm Password" required>
           <input v-model="reg_account.PhoneNumber" type="tel" class="form-control" placeholder="Phone Number" required>
@@ -32,9 +33,9 @@
           </p>
         </form>
       </div>
-      
+
       </div>
-      
+
 
 
     </div>
@@ -55,6 +56,7 @@ export default{
       },
       reg_account: {
         Email : "",
+        Name : "",
         Password : "",
         Password_confirm : "",
         PhoneNumber : "",
@@ -68,14 +70,14 @@ export default{
     doLogin() {
         if (this.prop_account.email === "" || this.prop_account.password === "") {
             this.emptyFields = true;
-        } 
-        else {          
+        }
+        else {
           this.get_Login()
         }
       },
-      
+
     doRegister() {
-        if (this.emailReg === "" || this.passwordReg === "" || this.confirmReg === "") {
+        if (this.reg_account.Email === "" || this.reg_account.Name === "" || this.reg_account.Password === "" || this.reg_account.Password_confirm === "" || this.reg_account.PhoneNumber === "") {
           this.emptyFields = true;
         } else {
           this.post_register_account()
@@ -101,7 +103,7 @@ export default{
       .then( data => {
           if(data.code == '200' && data.message=='login success'){
             this.get_UserID()
-            
+
           }
           else {
             alert('Login Failed')
@@ -120,7 +122,7 @@ export default{
       })
       .then( data => {
         this.$store.commit("setLogin", this.prop_account);
-        this.$store.commit("setUserID", data.id)
+        this.$store.commit("setUserID", data)
         this.$store.commit("saveSessionStorageLogin")
         console.log("Login")
         this.$router.push('/mypage')
@@ -137,6 +139,7 @@ export default{
         body: JSON.stringify({
           email: this.reg_account.Email,
           password: this.reg_account.Password,
+          name: this.reg_account.Name,
           phone_number: this.reg_account.PhoneNumber,
         }),
       }).then( data => {
@@ -180,7 +183,7 @@ export default{
     //   })
     // },
 
-    
+
   }
 }
 </script>
@@ -191,7 +194,7 @@ export default{
   /* 그럼 얘는 머지? */
   justify-content: center;
   /* 수직 가운데 정렬 */
-  align-items: center;  
+  align-items: center;
   position : fixed;
   width: 40vw;
   height: 80vh;

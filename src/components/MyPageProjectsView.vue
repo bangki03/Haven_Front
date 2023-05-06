@@ -2,7 +2,7 @@
     <h4 style="text-align: left; margin-left: 1em;">PROJECTS</h4>
     <div class="row" style="display: block; height:12%;  margin: 0;"></div>
     <div class="row" style="display: flex; height:85%; margin: 0;">
-        <div class="col" v-for="(myProject) in this.myProjectList" :key="myProject" style="display:inline-block; width:25%; height:85%; margin: 0; padding: 0 0.5em; flex-grow:1;">
+        <div class="col" v-for="(myProject) in this.myProjectList.slice(0,4)" :key="myProject" style="display:inline-block; width:25%; height:85%; margin: 0; padding: 0 0.5em; flex-grow:1;">
           <MyPageProjectsCard @click="click_ProjectCard(myProject)" :project_SummaryCard="myProject"/>
         </div>
         <div class="col" style="display:inline-block; width:25%; height:85%; margin: 0; padding: 0 0.5em; flex-grow:1;">
@@ -21,10 +21,10 @@
         <div class="col" style="display:inline-block; width:25%; height:85%; margin: 0; padding: 0 0.5em;">
             <MyPageProjectsCard @click=" click_ProjectCard"></MyPageProjectsCard>
         </div> -->
-    
+
     </div>
 
-    <MyPageProjectsCreateModal v-if="iscreateProjectOpen" class="create-myProject" @blur="closeModal"></MyPageProjectsCreateModal>
+    <MyPageProjectsCreateModal v-if="iscreateProjectOpen" class="create-myProject" @closeModal="closeModal"></MyPageProjectsCreateModal>
 </template>
 
 <script>
@@ -48,26 +48,28 @@ export default {
     },
 
     methods: {
-        click_ProjectCard() {
-            this.$router.push('/project')
+        click_ProjectCard(myProject) {
+            this.$store.commit("setProject", myProject)
+            this.$router.push('/project/annotate')
         },
-        click_createProject(){
-            this.iscreateProjectOpen = true;
+        // click_createProject(){
+        //     this.iscreateProjectOpen = true;
 
-        },
+        // },
 
         openModal(){
             this.iscreateProjectOpen = true;
 
-            // let self = this;  
+            // let self = this;
             // this.$nextTick(function(){
             //     self.$refs.mymodal.focus();
-            // })    
-            
+            // })
+
         },
-                
+
         closeModal(){
             this.iscreateProjectOpen = false;
+            console.log("modal destruct")
             // var LayerPopup = $(".create-myProject");
             // if(LayerPopup.has(e.target).length === 0){
             //     // LayerPopup.removeClass("show");
@@ -99,5 +101,6 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
+
 </style>
