@@ -44,6 +44,8 @@ export default {
   },
   computed: {
     isActive() {
+      console.log('[computed][tool.js][isActive] - this.selected')
+      console.log(this.selected)
       if (this.selected == this.name) {
         this.$emit("setcursor", this.cursor);
         return true;
@@ -70,6 +72,8 @@ export default {
   },
   watch: {
     isActive(active) {
+      console.log("[watch][tool.js][isActive] - this.tool")
+      console.log(this.tool)
       if (active) {
         this.tool.activate();
       }

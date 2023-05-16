@@ -101,7 +101,8 @@ export default {
      * Unites current selection with selected annotation
      */
     merge() {
-      console.log("BrushTool-onMouseUp-merge() : "+this.selection)
+      console.log("[BrushTool][onMouseUp][merge] - this.selection")
+      console.log(this.selection)
       this.$parent.uniteCurrentAnnotation(this.selection);
     },
     decreaseRadius() {
@@ -129,6 +130,8 @@ export default {
       this.update();
     },
     update() {
+      console.log("[BrushTool][click][update] - this.name")
+      console.log(this.name)
       if (this.isDisabled) return;
 
       this.$emit("update", this.name);

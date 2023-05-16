@@ -70,6 +70,7 @@
               <CategoryPanel
                 v-for="(category, index) in categories"
                 :key="category.id + '-category'"
+                :test = "category.id + '-category'"
                 :simplify="simplify"
                 :categorysearch="search"
                 :category="category"
@@ -179,7 +180,7 @@
 
     </div>
 
-    <!-- <div class="border-card" id="thumbnail-container" 
+    <!-- <div class="border-card" id="thumbnail-container"
     v-for="(myImage) in this.datalist.slice(0,4)" :key="myImage"
     style="display:flex; flex-direction:column; align-items: center; justify-content: space-around; width:18%; height: 98%; background-color: white;"> -->
     <div class="border-card" id="thumbnail-container"
@@ -192,13 +193,18 @@
       /> -->
       <i
         v-show=true
+        id="arrow-previous"
         class="fa fa-arrow-up image-arrows"
-        style="font-size: 30px; transform: scaleX(4); color: gray;"
-        @click="route(previousimage)"
+        style="font-size: 30px; transform: scaleX(4); color: #6CC2FF;"
+        :style = "{ 'opacity' : index_image.start !==0 ? 100 : 0 }"
+        @click="index_image.start !== 0 ? route_previous() : null"
       />
 
-      <div v-for="(myImage) in datalist" :key="myImage">
-        <AnnotatorThumbnailCard @click="click_ThumbnailCard(myImage)" :image_ThumbnailCard="myImage"></AnnotatorThumbnailCard>
+      <div v-for="(myImage) in datalist.slice(index_image.start,index_image.end)" :key="myImage">
+        <AnnotatorThumbnailCard @click="click_ThumbnailCard($event, myImage)" :image_ThumbnailCard="myImage"
+        style="border-color: #BD7C4A ;"
+        :style="{ 'border-style': selected_Thumbnail === myImage ? 'solid' : 'none' }"
+        ></AnnotatorThumbnailCard>
       </div>
 
       <!-- <i
@@ -209,9 +215,11 @@
       /> -->
       <i
         v-show=true
+        id="arrow-next"
         class="fa fa-arrow-down image-arrows"
-        style="font-size: 30px; transform: scaleX(4); color: gray;"
-        @click="route(nextimage)"
+        style="font-size: 30px; transform: scaleX(4); color: #6CC2FF;"
+        :style = "{ 'opacity' : index_image.end !== index_image.num_items ? 100 : 0 }"
+        @click="index_image.end !== index_image.num_items ? route_next() : null"
       />
     </div>
 
@@ -242,8 +250,6 @@
   import EraserPanel from "@/components/annotator/panels/EraserPanel";
 
   import SaveButton from "@/components/annotator/tools/SaveButton";
-
-
 
   export default {
     name: "AnnotationView",
@@ -282,6 +288,10 @@
     // },
     data() {
       return {
+        selected_Thumbnail: null,
+
+        tools: [],
+        loading_created : true,
 
         API_List : null,
         selectedFilter1: -1,
@@ -298,9 +308,21 @@
           page: 1,
           size: 50,
         },
+        index_image: {
+          limit: 50,
+          num_items : 0,
+          start: 0,
+          end: 0,
+        },
+
+
+        color_arrow: {
+          active: "#6CC2FF",
+          disabled: "black",
+        },
 
         datalist: [],
-      
+
         activeTool: "Select",
         paper: null,
         shapeOpacity: 0.6,
@@ -327,7 +349,7 @@
         image: {
           raster: {},
           scale: 0,
-          metadata: {},
+          // metadata: {},
           ratio: 0,
           rotate: 0,
           id: null,
@@ -364,6 +386,11 @@
       };
     },
     methods: {
+      //////////////////////////////////// 임시 ////////////////////////////////////
+      updateCurrentAnnotation(newAnnotation) {
+        this.current.annotation = newAnnotation;
+      },
+
       //////////////////////////////////// Filter ////////////////////////////////////
       selectFilter_created() {
         this.selectedFilter1 = 0
@@ -471,19 +498,27 @@
               is_label: this.filter.is_label,
               order_by: this.filter.order_by,
               page: 1,
-              size: 4,
+              size: this.index_image.limit,
           },  // HTTP 요청과 함께 서버로 보낼 데이터
         })
         .then( (data) => {
-          this.datalist = data.items
+          this.index_image.num_items = Math.min(data.size, data.total)
+          this.index_image.start = 0
+          this.index_image.end = Math.min(4, data.total)
+
+          this.datalist = data.items.slice(0, this.index_image.num_items)
           console.log(this.datalist)
-          
+
+          console.log("[load_annotator] - this.index_image.num_items : " + this.index_image.num_items)
+          console.log("[load_annotator] - this.index_image.start : " + this.index_image.start)
+          console.log("[load_annotator] - this.index_image.end : " + this.index_image.end)
+
           // 임시 Test 용
-          
-          this.datalist[0].image_file_path = "/iQ.Platform/data/2023-05-04/16:34:06/01_image.jpg"
-          this.datalist[1].image_file_path = "/iQ.Platform/data/2023-05-04/16:34:06/02_image.jpg"
-          this.datalist[2].image_file_path = "/iQ.Platform/data/2023-05-04/16:34:06/03_image.jpg"
-          this.datalist[3].image_file_path = "/iQ.Platform/data/2023-05-04/16:34:06/04_image.jpg"
+
+          // this.datalist[0].image_file_path = "/iQ.Platform/data/2023-05-04/17:36:48/01_image.jpg"
+          // this.datalist[1].image_file_path = "/iQ.Platform/data/2023-05-04/17:36:48/02_image.jpg"
+          // this.datalist[2].image_file_path = "/iQ.Platform/data/2023-05-04/17:36:48/03_image.jpg"
+          // this.datalist[3].image_file_path = "/iQ.Platform/data/2023-05-04/17:36:48/04_image.jpg"
 
 
           // this.$store.commit("setLogin", this.prop_account);
@@ -498,28 +533,84 @@
       //////////////////////////////////////////////////////////////////////////////////
 
       //////////////////////////////////// Thumbnail ////////////////////////////////////
-      click_ThumbnailCard(data) {
-        console.log("del this.paper")
-        this.paper = null
-        // this.image에다가 클릭한 data 넣자.
-        this.ThumbnailToThis(data)
-        this.load_annotator()
+      click_ThumbnailCard(event, data) {
+        // paper & canvas 초기화
+        console.log("[click_ThumbnailCard]")
 
-        this.initCanvas();
-        this.getData();
-      },
-
-      ThumbnailToThis(data) {
-        this.image.raster = {}
-        this.image.scale = 0
-        this.image.metadata = {}
-        this.image.ratio = 0
-        this.image.rotate = 0
-        this.image.id = null
+        this.current.category = 0
+        this.current.annotation = -1
+        // this.categories[0].annotations = []
 
         this.image.url = data.image_file_path
         this.image.filename = data.image_file_path
-        
+        console.log("[click_ThumbnailCard] set image url : " + this.image.url)
+        this.load_annotator() // 완료되면 얘가 current.annotation = 0 로 바꿔줌
+
+
+        let canvas = document.getElementById("editor");
+
+        // 이전에 생성된 editor 요소 제거
+        if (canvas) {
+          canvas.parentNode.removeChild(canvas);
+        }
+
+        // 새로운 editor 요소 생성
+        // <canvas class="canvas" id="editor" ref="image" resize />
+        let newEditor = document.createElement("canvas");
+        newEditor.classList.add("canvas");
+        newEditor.setAttribute("id", "editor");
+        newEditor.setAttribute("ref", "image");
+        newEditor.setAttribute("resize", "");
+
+        // editor를 추가할 부모 요소를 찾아 새로운 editor 요소를 추가
+        let parentElement = document.querySelector("#frame");
+        parentElement.appendChild(newEditor);
+
+        // 새로 생성된 editor 요소에 대한 작업을 수행
+        // 예: 초기 상태로 설정, 이벤트 리스너 등록 등
+
+        // 이제 canvas 변수는 새로운 editor 요소를 참조하게 됩니다.
+        canvas = newEditor;
+
+
+        this.initCanvas();
+        // this.getData();
+
+
+        ///////////////////////////////////
+        this.selected_Thumbnail = data
+
+      },
+
+      setThumbnailToThisImage(data) {
+        console.log("[setThumbnailToThisImage]")
+        this.image.raster = {}
+        console.log("[setThumbnailToThisImage] - set image raster {}")
+        this.image.scale = 0
+        // this.image.metadata = {}
+        this.image.ratio = 0
+        this.image.rotate = 0
+        this.image.id = null
+        this.image.categoryIds = [6],
+        this.image.data = [],
+        this.image.previous= null,
+        this.image.next = null,
+
+        this.image.url = data.image_file_path
+        this.image.filename = data.image_file_path
+        console.log("setThumbnailToThisImage : imageurl : " + this.image.url)
+
+        // let tmp_image = new Image();
+        // tmp_image.src = this.image.url
+
+        // if(tmp_image.complete) {
+        //   this.image.width = tmp_image.width
+        //   this.image.height = tmp_image.height
+        // }
+        // else{
+        //   console.log("비상!!!! 이미지 width, height 없다!!!!")
+        // }
+
         // raster: {},
         // scale: 0,
         // metadata: {},
@@ -544,8 +635,15 @@
 
       // Categorypanel 의 prop(category) 변경 error 개선 위한 emit 함수
       createAnnotation_push(data) {
+        console.log("[AnnotatorView][createAnnotation_push]")
+        console.log("###################################### this.categories - before ######################################")
+        console.log(this.categories)
         // this.category.annotations.push(data);
         this.categories[0].annotations.push(data);
+        this.categories[0].annotations[0].width = this.image.width;
+        this.categories[0].annotations[0].height = this.image.height;
+        console.log("###################################### this.categories - after ######################################")
+        console.log(this.categories)
       },
       onUpdateClick_keypoint_labels(data) {
         this.category.keypoint_labels = [...data];
@@ -604,16 +702,30 @@
       },
 
 
+
       // Current Annotation Operations
       uniteCurrentAnnotation(compound, simplify = true, undoable = true, isBBox = false) {
-        console.log("BrushTool-onMouseUp-$parent.uniteCurrentAnnotation(compound) : "+this.compound)
+        console.log("[AnnotatorView][uniteCurrentAnnotation] - compound ")
+        console.log(compound)
+        console.log("[AnnotatorView][uniteCurrentAnnotation] - this.currentAnnotation (before)")
+        if(this.currentAnnotation == null) {
+          console.log(null)
+        }
+        else {
+          console.log(this.currentAnnotation.annotation)
+        }
         if (this.currentAnnotation == null) return;
         this.currentAnnotation.unite(compound, simplify, undoable, isBBox);
-        console.log(this.currentAnnotation)
+        console.log("[AnnotatorView][uniteCurrentAnnotation] - this.currentAnnotation (after)")
+        console.log(this.currentAnnotation.compoundPath)
       },
       subtractCurrentAnnotation(compound, simplify = true, undoable = true) {
+        console.log("[AnnotatorView][subtractCurrentAnnotation] - compound ")
+        console.log(compound)
         if (this.currentCategory == null) return;
         this.currentAnnotation.subtract(compound, simplify, undoable);
+        console.log("[AnnotatorView][subtractCurrentAnnotation] - this.currentAnnotation ")
+        console.log(this.currentAnnotation.annotation)
       },
 
       // AnnotationPanel -> CategoryPanel -> AnnotatorView 로 2중 emit으로 category.annotate 바꾸는 함수
@@ -696,7 +808,8 @@
       },
       fit() {
         let canvas = document.getElementById("editor");
-        console.log("AnnotatorView > fit() > canvas :" + canvas )
+        console.log("[AnnotatorView][fit] - canvas :")
+        console.log(canvas)
 
         let parentX = this.image.raster.width;
         let parentY = this.image.raster.height;
@@ -711,30 +824,88 @@
       },
 
       setCursor(newCursor) {
+        console.log("[newCursor]")
+        console.log(newCursor)
         this.cursor = newCursor;
       },
       initCanvas() {
-        console.log("initCanvas")
-        console.log("newPaper")
-        this.paper = new paper.PaperScope();
+        console.log("[AnnotatorView][initCanvas]")
 
         // let process = "Initializing canvas";
         // this.addProcess(process);
         this.loading.image = true;
-
         let canvas = document.getElementById("editor");
+        console.log("###################################### HERE ################################# Canvas")
+        console.log(canvas)
         this.paper.setup(canvas);
         this.paper.view.viewSize = [
-          this.paper.view.size.width,
+          // this.paper.view.size.width,
+          // window.innerWidth,
+          1296,
           window.innerHeight
         ];
+        console.log("#################################### this.paper.view.viewSize ####################################")
+        console.log(this.paper.view.viewSize)
+
         this.paper.activate();
 
         this.image.raster = new paper.Raster(this.image.url);
+        console.log("[AnnotatorView][initCanvas] - Canvas")
+        console.log(canvas)
+        // setTimeout(() => {
+        //   this.image.raster.onLoad = () => {
+        //   let width = this.image.raster.width;
+        //   let height = this.image.raster.height;
+        //   console.log(width)
+        //   console.log(height)
+        //   this.image.raster.sendToBack();
+        //   this.fit();
+        //   this.image.ratio = (width * height) / 1000000;
+        //   // this.removeProcess(process);
+
+        //   let tempCtx = document.createElement("canvas").getContext("2d");
+        //   tempCtx.canvas.width = width;
+        //   tempCtx.canvas.height = height;
+        //   tempCtx.drawImage(this.image.raster.image, 0, 0);
+
+        //   this.image.data = tempCtx.getImageData(0, 0, width, height);
+        //   let fontSize = width * 0.025;
+
+        //   let positionTopLeft = new paper.Point(
+        //     -width / 2,
+        //     -height / 2 - fontSize * 0.5
+        //   );
+        //   this.text.topLeft = new paper.PointText(positionTopLeft);
+        //   this.text.topLeft.fontSize = fontSize;
+        //   this.text.topLeft.fillColor = "white";
+        //   this.text.topLeft.content = this.image.filename;
+
+        //   let positionTopRight = new paper.Point(
+        //     width / 2,
+        //     -height / 2 - fontSize * 0.4
+        //   );
+        //   this.text.topRight = new paper.PointText(positionTopRight);
+        //   this.text.topRight.justification = "right";
+        //   this.text.topRight.fontSize = fontSize;
+        //   this.text.topRight.fillColor = "white";
+        //   this.text.topRight.content = width + "x" + height;
+
+        //   this.loading.image = false;
+        // };
+
+        // }, 100)
+
+
         this.image.raster.onLoad = () => {
+          console.log('[AnnotatorView][initCanvas] - onloaded')
           let width = this.image.raster.width;
           let height = this.image.raster.height;
+          console.log('[AnnotatorView][initCanvas] - image_url : ' + this.image.url)
+          console.log('[AnnotatorView][initCanvas] - (width x height) : ' + width + "x"+ height)
+          console.log('[AnnotatorView][initCanvas] - this.image')
+          console.log(this.image)
 
+          console.log("[AnnotatorView][initCanvas][sendToBack]")
           this.image.raster.sendToBack();
           this.fit();
           this.image.ratio = (width * height) / 1000000;
@@ -769,6 +940,16 @@
 
           this.loading.image = false;
         };
+
+
+        // this.image.raster.source = this.image.url;
+        // this.image.ratio = (this.image.width * this.image.height) / 1000000;
+
+        // this.$nextTick(() => {
+        //   console.log("[AnnotationView][initCanvas] - showAll")
+        //   this.showAll();
+        // });
+
       },
       setPreferences(preferences) {
         let refs = this.$refs;
@@ -780,228 +961,38 @@
         refs.brush.setPreferences(preferences.brush || {});
         refs.eraser.setPreferences(preferences.eraser || {});
       },
-      getData() {
-        // let process = "Loading annotation data";
-        // this.addProcess(process);
-        this.loading.data = true;
+      // getData(response) {
+      //   let data = response.data;
 
-        // let data = response.data;
+      //   this.loading.data = false;
+      //   // Set image data
+      //   this.image.metadata = data.image.metadata || {};
+      //   this.image.filename = data.image.file_name;
+      //   this.image.next = data.image.next;
+      //   this.image.previous = data.image.previous;
+      //   this.image.categoryIds = data.image.category_ids || [];
 
-        this.loading.data = false;
-        // Set image data
-        this.image.metadata = {};
-        this.image.next = null;
-        this.image.previous = null;
-        this.image.categoryIds = [6]
+      //   this.annotating = data.image.annotating || [];
 
-        this.annotating = [];
+      //   // Set other data
+      //   this.dataset = data.dataset;
+      //   this.categories = data.categories;
 
-        // Set other data
-        // this.dataset = data.dataset;
-        this.categories = [
-          {
-            // annotations: [],
-            annotations: [
-              {
-                "id": 304,
-                "image_id": 274,
-                "category_id": 6,
-                "dataset_id": 13,
-                "segmentation": [
-                  [
-                    892,
-                    791.5,
-                    893.5,
-                    787.9,
-                    897,
-                    786.5,
-                    898.8,
-                    786.8,
-                    902.3,
-                    785.4,
-                    910.8,
-                    785.5,
-                    913.8,
-                    787.4,
-                    915.8,
-                    791.5,
-                    915.8,
-                    795.7,
-                    914.7,
-                    798.8,
-                    913.6,
-                    800,
-                    912.6,
-                    802,
-                    908.7,
-                    804.8,
-                    905.5,
-                    806,
-                    899.1,
-                    805.9,
-                    896.2,
-                    804,
-                    894,
-                    801.9,
-                    892,
-                    797.8,
-                    892,
-                    792
-                  ]
-                ],
-                "area": 404,
-                "bbox": [
-                  892,
-                  785,
-                  24,
-                  21
-                ],
-                "iscrowd": false,
-                "isbbox": false,
-                "creator": "jrlee",
-                "width": 2448,
-                "height": 2048,
-                "color": "#034add",
-                "keypoints": [],
-                "metadata": {},
-                "paper_object": [
-                  "CompoundPath",
-                  {
-                    "applyMatrix": true,
-                    "opacity": 0.6,
-                    "data": {
-                      "annotationId": 0,
-                      "categoryId": 0
-                    },
-                    "children": [
-                      [
-                        "Path",
-                        {
-                          "applyMatrix": true,
-                          "segments": [
-                            [
-                              -332,
-                              -232.5
-                            ],
-                            [
-                              -330.5,
-                              -236.1
-                            ],
-                            [
-                              -327,
-                              -237.5
-                            ],
-                            [
-                              -325.2,
-                              -237.2
-                            ],
-                            [
-                              -321.7,
-                              -238.6
-                            ],
-                            [
-                              -313.2,
-                              -238.5
-                            ],
-                            [
-                              -310.2,
-                              -236.6
-                            ],
-                            [
-                              -308.2,
-                              -232.5
-                            ],
-                            [
-                              -308.2,
-                              -228.3
-                            ],
-                            [
-                              -309.3,
-                              -225.2
-                            ],
-                            [
-                              -310.4,
-                              -224
-                            ],
-                            [
-                              -311.4,
-                              -222
-                            ],
-                            [
-                              -315.3,
-                              -219.2
-                            ],
-                            [
-                              -318.5,
-                              -218
-                            ],
-                            [
-                              -324.9,
-                              -218.1
-                            ],
-                            [
-                              -327.8,
-                              -220
-                            ],
-                            [
-                              -330,
-                              -222.1
-                            ],
-                            [
-                              -332,
-                              -226.2
-                            ],
-                            [
-                              -332,
-                              -232
-                            ]
-                          ],
-                          "closed": true
-                        }
-                      ]
-                    ],
-                    "fillColor": [
-                      0,
-                      0.6,
-                      0.7
-                    ]
-                  }
-                ],
-                "deleted": false,
-                "milliseconds": 32926,
-                "events": []
-              }
-            ],
-            color: "#029fbb",
-            creator: "khbang",
-            deleted: false,
-            id: 1,
-            keypoint_colors: [],
-            keypoint_edges: [],
-            keypoint_labels: [],
-            metadata: {},
-            name: "NG",
-            show: true,
-            supercategory: "",
-            visualize: false,
-          },
-        ]
+      //   // Update status
 
-        // Update status
+      //   this.setDataset(this.dataset);
 
-        // this.setDataset(this.dataset);
+      //   let preferences = data.preferences;
+      //   this.setPreferences(preferences);
 
-        // let preferences = data.preferences;
-        // this.setPreferences(preferences);
+      //   if (this.text.topLeft != null) {
+      //     this.text.topLeft.content = this.image.filename;
+      //   }
 
-        if (this.text.topLeft != null) {
-          this.text.topLeft.content = this.image.filename;
-        }
-
-        this.$nextTick(() => {
-          this.showAll();
-        });
-      },
+      //   this.$nextTick(() => {
+      //     this.showAll();
+      //   });
+      // },
       getData1() {
         this.loading.data = true;
         this.loading.data = false;
@@ -1009,7 +1000,7 @@
         //////////////////////////////////////////////////////////////////
         // 일단 고정으로 박아넣고, 나중에 덜어내자.
         // Set image data
-        this.image.metadata = {};
+        // this.image.metadata = {};
         this.image.categoryIds = [6]
         this.annotating = [];
 
@@ -1023,7 +1014,7 @@
             keypoint_colors: [],
             keypoint_edges: [],
             keypoint_labels: [],
-            metadata: {},
+            // metadata: {},
             name: "NG",
             show: true,
             supercategory: "",
@@ -1064,14 +1055,47 @@
         }
 
         this.$nextTick(() => {
+          console.log('[AnnotatorView][getData1] - showAll')
           this.showAll();
         });
       },
+
+      initData() {
+        this.image.categoryIds = [6]
+        this.annotating = [];
+
+        this.categories = [
+          {
+            annotations: [],
+            color: "#029fbb",
+            creator: "khbang",
+            deleted: false,
+            id: 1,
+            keypoint_colors: [],
+            keypoint_edges: [],
+            keypoint_labels: [],
+            // metadata: {},
+            name: "NG",
+            show: true,
+            supercategory: "",
+            visualize: false,
+          },
+        ]
+        console.log('[created][AnnotatorView][initData] - this.categories')
+        console.log(this.categories)
+      },
+
+
+
       showAll() {
+        console.log("[AnnotationView][showAll]")
         if (this.$refs.category == null) return;
 
         this.$refs.category.forEach(category => {
-          category.isVisible = category.category.annotations.length > 0;
+          // category.isVisible = category.category.annotations.length > 0;
+          category.isVisible = true
+          console.log("[AnnotationView][showAll] - category.isVisible")
+          console.log(category.isVisible)
         });
       },
       hideAll() {
@@ -1082,15 +1106,15 @@
           category.showAnnotations = false;
         });
       },
-      removeFromAnnotatingList() {
-        if (this.user == null) return;
+      // removeFromAnnotatingList() {
+      //   if (this.user == null) return;
 
-        var index = this.annotating.indexOf(this.user.username);
-        //Remove self from list
-        if (index > -1) {
-          this.annotating.splice(index, 1);
-        }
-      },
+      //   var index = this.annotating.indexOf(this.user.username);
+      //   //Remove self from list
+      //   if (index > -1) {
+      //     this.annotating.splice(index, 1);
+      //   }
+      // },
       onKeypointsComplete() {
         this.currentAnnotation.keypoint.next.label = -1;
         this.activeTool = this.$refs.select;
@@ -1101,13 +1125,23 @@
         if (index < 0) return null;
 
         let ref = this.$refs.category;
+        console.log('[AnnotatorView][getCategory] - index : ' + index)
+        console.log('[AnnotatorView][getCategory] - ref : ')
+        console.log(ref)
 
         if (ref == null) return null;
         if (ref.length < 1 || index >= ref.length) return null;
 
+        console.log('[AnnotatorView][getCategory] - this.$refs.category[index]')
+        console.log(this.$refs.category[index])
+
         return this.$refs.category[index];
       },
 
+      // 임시
+      initAnnotation() {
+        this.$refs.category[0].initAnnotation(0)
+      },
 
       //////////////////////////////////// Save ////////////////////////////////////
       save(callback) {
@@ -1177,26 +1211,31 @@
 
         let data = {
           image: {
-            path: this.image.path,
-            filename: this.image.filename,
-            width: this.image.width,
-            height: this.image.height,
+            path: this.image.url,
+            width: this.image.raster.width,
+            height: this.image.raster.height,
           },
-          annotations: {}
+          annotations: []
         };
 
         if (refs.category != null && this.mode === "segment") {
           refs.category.forEach(category => {
             let categoryData = category.export();
+            console.log("[AnnotatorView][save1] - categoryData")
+            console.log(categoryData)
 
-            data.annotations = categoryData.annotations[0]
-            delete data.annotations.id
-            delete data.annotations.isbbox
-            delete data.annotations.metadata
-            delete data.annotations.sessions
+            data.annotations.push(categoryData.annotations[0])
+            console.log("[AnnotatorView][save1] - data.annotations")
+            console.log(data.annotations)
+            delete data.annotations[0].id
+            delete data.annotations[0].color
+            delete data.annotations[0].fillcolor
+            delete data.annotations[0].isbbox
+            // delete data.annotations[0].metadata
+            delete data.annotations[0].sessions
           });
         }
-        console.log("#### Clicked Save Button ####")
+        console.log("[AnnotatorView][save1] - data (after)")
         console.log(data)
 
         axios
@@ -1205,45 +1244,163 @@
             //TODO: updateUser
             if (callback != null) callback();
           })
-          .finally(() => this.removeProcess(process));
+          // .finally(() => this.removeProcess(process));
       },
 
-      load_annotator(callback) {
-        // let data = {
-        //   path: this.image.path
-        // }
+      load_annotator() {
+        // this.categories = []
+        console.log("[load_annotator]")
+        $.ajax({
+          url: this.API_List.annotator_load,
+          method: "GET",
+          dataType: "json",
+          data: {
+            image_path: this.image.url,
+          },
+        })
+        .then((data) => {
+          console.log('[load_annotator] - data.annotations')
+          console.log(data.annotations)
 
-        axios
-          .get(this.API_List.annotator_load + this.image.filename)
-          .then(() => {
-            //TODO: updateUser
-            if (callback != null) callback();
-          })
+          console.log('[load_annotator] - data.annotations[0]')
+          console.log(data.annotations[0])
+          console.log('[load_annotator] - categories (before)')
+          console.log(this.categories)
+
+          console.log('[load_annotator] - set annotations')
+
+          // this.categories[0].annotations = data.annotations
+
+          // this.categories[0].annotations.splice(0, 1, data.annotations[0]);
+
+          // delete this.categories[0].annotations
+          // this.categories[0].annotations = data.annotations
+          // if (data.annotations.length == 0) {
+          //   this.$refs.category[0].createAnnotation()
+          // }
+
+          if (data.annotations.length > 0) {
+            this.categories[0].annotations.splice(0, 1, data.annotations[0]);
+            this.categories[0].annotations[0].id = 1
+            this.categories[0].annotations[0].width = this.image.width
+            this.categories[0].annotations[0].height = this.image.height
+          }
+          else {
+            console.log('[load_annotator] ########################## No Annotations ##########################')
+            let annotation1 = {
+              area: 0,
+              bbox: [0, 0, 0, 0],
+              category_id : 6,
+              color : "#d78200",
+              creator : "ghbang",
+              deleted : false,
+              events: [],
+              id: 1, // 수정 필
+              image_id: 0,  // 수정 필
+              isbbox: false,
+              iscrowd: false,
+              keypoints: [],
+              // metadata: {},
+              milliseconds: 0,
+              paper_object: [],
+              segmentation: [],
+              height: this.image.width,
+              width: this.image.height
+            }
+
+            this.categories[0].annotations.splice(0, 1, annotation1);
+            // this.$refs.category[0].createAnnotation()
+          }
+
+
+          // this.categories.push({
+          //   'color' : '#dc5f74',
+          //   'created' : 'khbang',
+          //   'deleted' : false,
+          //   'id' : 1,
+          //   'keypoint_colors' : [],
+          //   'keypoint_edges' : [],
+          //   'keypoint_labels' : [],
+          //   'name' : 'NG',
+          //   'show': true,
+          //   'visualize': false,
+          //   'width' : this.image.width,
+          //   'height' : this.image.height,
+          //   'annotations': data.annotations})
+          console.log('[load_annotator] - categories (after)')
+          console.log(this.categories[0])
+
+        })
+        .catch((error) => {
+          alert(error)
+          // 괜히 신규 annotating 하려했다가 통신 에러이면 라벨링파일 꼬이니까!
+          // this.categories[0].annotations = []
+
+          // 그냥 하지말고 alert 띄우자.
+          // alert("[Error] 라벨링 페이지 통신 에러 (image.url): " + this.image.url)
+        })
+        .then(() => {
+          this.$nextTick(() => {
+            console.log("[AnnotatorView][load_annotator] : Done loading, So Lets set this.current.annotation = 0")
+            console.log("Check if the getAnnotation set well - 1. this.categories[0].annotations")
+            console.log(this.categories[0].annotations)
+            console.log("Check if the getAnnotation set well - 2. this.$refs.category[0]")
+            console.log(this.$refs.category[0])
+            console.log("Check if the getAnnotation set well - 2-1. this.$refs.category[0].$refs")
+            console.log(this.$refs.category[0].$refs)
+            // console.log("Check if the getAnnotation set well - 3. this.$refs.category[0].$refs.annoation[0]")
+            // console.log(this.$refs.category[0].$refs.annoation[0])
+            console.log("[AnnotationView][load_annotator] - this.current.annotation (현재)")
+            console.log(this.current.annotation)
+            console.log("[AnnotationView][load_annotator] : set this.current.annotation = 0")
+            // this.updateCurrentAnnotation(0)
+            this.current.annotation = 0
+            console.log("[AnnotationView][load_annotator] : showAll")
+            this.showAll();
+          });
+        })
+
 
       },
-      
+
+
+
 
 
 
 
 
       //////////////////////////////////// Thumbnail ////////////////////////////////////
-      route(identifier) {
-        // Make sure we pop the latest session before annotations
-        this.current.annotation = -1;
-        console.log(identifier)
+      // route(identifier) {
+      //   // Make sure we pop the latest session before annotations
+      //   this.current.annotation = -1;
+      //   console.log(identifier)
 
-        // this.$nextTick(() => {
-        //   this.$parent.save(() => {
-        //     this.$router.push({ name: "annotate", params: { identifier } });
-        //   });
-        // });
+      //   this.$nextTick(() => {
+      //     this.$parent.save(() => {
+      //       this.$router.push({ name: "annotate", params: { identifier } });
+      //     });
+      //   });
+      // },
+
+      route_next() {
+        console.log("[AnnotatorView][route][next]")
+        this.index_image.start = Math.max(this.index_image.start + 4, 0);
+        this.index_image.end = Math.min(this.index_image.end + 4, this.index_image.limit);
+
+        console.log("[AnnotatorView][route][next] - this.index_image.start : " + this.index_image.start)
+        console.log("[AnnotatorView][route][next] - this.index_image.end : " + this.index_image.end)
+
       },
+      route_previous() {
+        console.log("[AnnotatorView][route][previous]")
+        this.index_image.start = Math.max(this.index_image.start - 4, 0);
+        this.index_image.end = Math.min(this.index_image.end - 4, this.index_image.limit);
 
-      // route1(identifier) {
-      //   this.initCanvas();
-      //   this.getData1();
-      // }
+        console.log("[AnnotatorView][route][previous] - this.index_image.start : " + this.index_image.start)
+        console.log("[AnnotatorView][route][previous] - this.index_image.end : " + this.index_image.end)
+
+      },
 
 
       //////////////////////////////////// Test - API ////////////////////////////////////
@@ -1251,15 +1408,50 @@
         axios.get('/api_list.json')
         .then(response => {
           this.API_List = response.data;
+          console.log(this.API_List)
         })
         .catch(error => {
           console.log(error);
         });
       },
+      set_APIlist_async() {
+        console.log('[AnnotatorView][set_APIlist_async] - Start')
+        return new Promise((resolve, reject) => {
+          axios.get('/api_list.json')
+          .then(data => {
+            console.log("[set_APIList_async]")
+            this.API_List = data.data
+            this.loading_API = false;
+            resolve()
+          })
+          .catch(error => {
+            reject(error);
+          })
+        })
+      },
 
 
     },
     watch: {
+      'index_image.num_items'() {
+        console.log("this.index_image.num_items : " + this.index_image.num_items)
+        console.log("this.index_image.start : " + this.index_image.start)
+        console.log("this.index_image.end : " + this.index_image.end)
+      },
+      "activeTool"(after, before){
+        console.log("[watch][activeTool] - before")
+        console.log(before)
+        console.log("[watch][activeTool] - after")
+        console.log(after)
+      },
+      "categories"(after, before) {
+        console.log("[watch][categories] - before")
+        console.log(before)
+        console.log("[watch][categories] - after")
+        console.log(after)
+      },
+
+      // "annotation"
       // doneLoading(done) {
       //   if (done) {
       //     if (this.loading.loader) {
@@ -1268,11 +1460,9 @@
       //   }
       // },
       currentCategory() {
+        console.log("[watch][AnnotatorView][currentCategory]")
         if (this.currentCategory != null) {
-          if (
-            this.currentAnnotation == null ||
-            !this.currentCategory.showAnnotations
-          ) {
+          if (this.currentAnnotation == null || !this.currentCategory.showAnnotations) {
             let element = this.currentCategory.$el;
             this.scrollElement(element);
           }
@@ -1281,6 +1471,7 @@
         console.log(this.current)
       },
       currentAnnotation(newElement) {
+        console.log("[watch][AnnotatorView][currentAnnotation]")
         if (newElement != null) {
           if (newElement.showAnnotations) {
             let element = newElement.$el;
@@ -1291,6 +1482,7 @@
         console.log(this.current)
       },
       "current.category"(cc) {
+        console.log("[watch][AnnotatorView][current.category]")
         console.log("watch > current.category > this.current :" + this.current)
         console.log(this.current)
         if (cc < -1) this.current.category = -1;
@@ -1300,6 +1492,7 @@
         }
       },
       "current.annotation"(ca) {
+        console.log("[watch][AnnotatorView][current.annotation]")
         console.log("watch > current.annotation > this.current :" + this.current)
         console.log(this.current)
         if (ca < -1) this.current.annotation = -1;
@@ -1311,6 +1504,7 @@
         }
       },
       "current.keypoint"(sk) {
+        console.log("[watch][AnnotatorView][current.keypoint]")
         if (sk < -1) this.current.keypoint = -1;
         if (this.currentCategory != null) {
           let max = this.currentAnnotationLength;
@@ -1319,12 +1513,14 @@
           }
         }
       },
-      annotating() {
-        this.removeFromAnnotatingList();
-      },
-      user() {
-        this.removeFromAnnotatingList();
-      },
+      // annotating() {
+      //   console.log("[watch][AnnotatorView][annotating]")
+      //   this.removeFromAnnotatingList();
+      // },
+      // user() {
+      //   console.log("[watch][AnnotatorView][user]")
+      //   this.removeFromAnnotatingList();
+      // },
 
 
 
@@ -1343,12 +1539,20 @@
       //   return this.currentAnnotation.annotation.keypoints.length;
       // },
       currentCategory() {
+        console.log("[computed][AnnotatorView][currentCategory] - this.current.category")
+        console.log(this.current.category)
+        console.log("[computed][AnnotatorView][currentCategory] - this.getCategory(this.current.category)")
+        console.log(this.getCategory(this.current.category))
         return this.getCategory(this.current.category);
       },
       currentAnnotation() {
+        console.log("[computed][AnnotatorView][currentAnnotation] - this.current.annotation")
+        console.log(this.current.annotation)
         if (this.currentCategory == null) {
           return null;
         }
+        console.log("[computed][AnnotatorView][currentAnnotation] - this.currentCategory.getAnnotation(this.current.annotation)")
+        console.log(this.currentCategory.getAnnotation(this.current.annotation))
         return this.currentCategory.getAnnotation(this.current.annotation);
       },
       // currentKeypoint() {
@@ -1373,21 +1577,64 @@
       //   return this.$store.getters["user/user"];
       // }
     },
-
-    mounted() {
-      this.initCanvas();
-      this.getData();
-      // this.getData1(this.image.filepath);
-
-    },
     created() {
-      // initCanvas로 옮겨서 click 될떄마다 init 해주자.
+      console.log('[created][AnnotationView]')
+      this.initData()
+      this.loading_created = true
+      // console.log("[created][AnnotationView] this.categories ######################################")
+      // console.log(this.categories)
+      // console.log("!!!!!!!!!!!!!!! PAPER - before Declaration !!!!!!!!!!!!!!!")
+      // console.log(this.paper)
+      console.log("[created][AnnotationView] - paper (before)")
+      console.log(this.paper)
       this.paper = new paper.PaperScope();
+      console.log("[created][AnnotationView] - paper (after)")
+      console.log(this.paper)
 
       // Test API config 파일 불러오기.
-      this.set_APIlist()
-      this.selectFilter_created()
-    }
+      this.set_APIlist_async()
+      .then(() => {
+        console.log("[created][AnnotationView] - then1")
+        console.log(this.API_List)
+        this.selectFilter_created()
+      })
+      .then(() => {
+        console.log("[created][AnnotationView] - then2")
+        // this.load_annotator();
+      })
+      .then(() => {
+        console.log("[created][AnnotationView] - then3")
+        console.log("[created][AnnotationView] - this.loading_created : false")
+        this.loading_created = false
+      })
+      .catch(error => {
+        console.log(error)
+      })
+
+
+      // this.image.url = "/iQ.Platform/data/2023-05-04/17:36:48/01_image.jpg"
+      // console.log("[created][AnnotationView] - set this.image.url")
+      // this.image.url = "../images/TestSampleImage.png";
+    },
+
+    mounted() {
+      console.log('[mounted][AnnotatorView]')
+      // console.log("[mounted][AnnotationView] this.categories ######################################")
+      // console.log(this.categoires)
+      // this.getData1();
+      // this.initCanvas();
+
+      // this.initAnnotation(this.current.category)
+      console.log('[mounted][AnnotatorView] - Mounted Done, Lets set current.category = 0')
+      this.current.category = 0
+      console.log('[mounted][AnnotatorView] - Mounted Done, Lets set current.annotation = 0')
+      this.current.annotation = 0
+
+      console.log("Check if the getAnnotation set well - 2-1. this.$refs.category[0].$refs")
+      console.log(this.$refs.category[0].$refs)
+
+    },
+
   };
 </script>
 

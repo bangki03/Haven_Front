@@ -60,6 +60,30 @@
         />
       </li>
 
+      <!-- <AnnotationPanel
+        v-for="(annotation, listIndex) in category.annotations"
+        :search="search"
+        :key="annotation.id"
+        :simplify="simplify"
+        :annotation="annotation"
+        :current="current.annotation"
+        @click="onAnnotationClick(listIndex)"
+        @keypoint-click="onKeypointClick(listIndex, $event)"
+        @keypoints-complete="$emit('keypoints-complete')"
+        :opacity="opacity"
+        :index="listIndex"
+        :keypoint-edges="keypoint.edges"
+        :keypoint-labels="keypoint.labels"
+        :keypoint-colors="keypoint.colors"
+        ref="annotation"
+        :hover="hover.annotation"
+        :active-tool="activeTool"
+        :scale="scale"
+        @deleted="annotationDeleted"
+        :all-categories="getCategoriesList"
+        @AnnotationPanel_unite="AnnotationPanel_unite"
+        @AnnotationPanel_emitModify="AnnotationPanel_emitModify"
+      /> -->
       <AnnotationPanel
         v-for="(annotation, listIndex) in category.annotations"
         :search="search"
@@ -173,6 +197,7 @@ export default {
     KeypointsDefinition
    },
   props: {
+    test: {},
     category: {
       type: Object,
       required: true
@@ -226,7 +251,7 @@ export default {
       },
       selectedAnnotation: -1,
       showAnnotations: false,
-      isVisible: false,
+      isVisible: true,
       search: "",
       isMounted: false,
     };
@@ -312,6 +337,7 @@ export default {
 
     //// 임시
     createAnnotation() {
+      console.log("[CategoryPanel][createAnnotation]")
       // let parent = this.$parent;
       let annotationId = this.category.annotations.length;
 
@@ -324,17 +350,18 @@ export default {
           dataset_id : 13,  // 수정 필
           deleted : false,
           events: [],
-          height: 2048,  // 수정 필
+          // height: 2048,  // 수정 필
           id: 1, // 수정 필
           image_id: 0,  // 수정 필
           isbbox: false,
           iscrowd: false,
           keypoints: [],
-          metadata: {},
+          // metadata: {},
           milliseconds: 0,
           paper_object: [],
+          // paper_object: ["CompoundPath", {"applyMatrix": true, 'children':[], data:{annotationId:0, categoryId:0}, fillColor:[0, 0.6, 0.7], opacity:0.6, strokeWidth: 0}],
           segmentation: [],
-          width: 2448, // 수정 필
+          // width: 2448, // 수정 필
         }
 
       // this.category.annotations 에다가 넣는게 안되니까, emit으로 처리해준건데, 여기서도 더 쓰이나?
@@ -344,7 +371,7 @@ export default {
       this.selectedAnnotation = annotationId;
       this.$nextTick(() => {
         // this.$parent.selectLastEditorTool();
-        console.log("click - 요기0")
+        console.log("[CategoryPanel][createAnnotation] $nextTick")
         this.$emit("clickcategory", {
           annotation: annotationId,
           category: this.index,
@@ -397,7 +424,7 @@ export default {
         // Show groups on canvas
         visualize: this.isVisible,
         color: this.color,
-        metadata: [],
+        // metadata: [],
         annotations: [],
         supercategory: this.category.supercategory,
         keypoint_labels: this.category.keypoint_labels,
@@ -447,7 +474,7 @@ export default {
 
       if (this.showAnnotations)
         if (this.isCurrent) {
-          console.log("click - 요기1")
+          console.log("[CategoryPanel][onEyeClick]")
           this.$emit("clickcategory", {
             annotation: this.selectedAnnotation,
             category: this.index,
@@ -467,7 +494,7 @@ export default {
       this.selectedAnnotation = annotation_index;
       this.showAnnotations = true;
 
-      console.log("click - 요기2")
+      console.log("[CategoryPanel][onKeypointClick]")
       this.$emit("clickcategory", indices);
     },
     /**
@@ -482,7 +509,7 @@ export default {
       this.selectedAnnotation = index;
       this.showAnnotations = true;
 
-      console.log("click - 요기3")
+      console.log("[CategoryPanel][onAnnotationClick]")
       this.$emit("clickcategory", indices);
     },
     /**
@@ -494,7 +521,7 @@ export default {
         category: this.index,
         keypoint: -1
       };
-      console.log("click - 요기4")
+      console.log("[CategoryPanel][onClick]")
       this.$emit("clickcategory", indices);
 
       if (this.category.annotations.length === 0) return;
@@ -514,8 +541,14 @@ export default {
      * @returns {Annotation} returns annotation and provided index
      */
     getAnnotation(index) {
+      console.log('[CategoryPanel][getAnnotation] - index : ' + index)
       let ref = this.$refs.annotation;
+      console.log('[CategoryPanel][getAnnotation] - ref : ')
+      console.log(ref)
       if (ref == null) return null;
+
+      console.log('[CategoryPanel][getAnnotation] - this.$refs.annotation[index]')
+      console.log(this.$refs.annotation[index])
       return this.$refs.annotation[index];
     },
     /**
@@ -548,10 +581,15 @@ export default {
         category: this.index,
         keypoint: -1,
       };
-      console.log("click - 요기5")
+      console.log("[CategoryPanel][annotationDeleted]")
       this.$emit("clickcategory", indices);
 
       if (this.category.annotations.length === 0) this.isVisible = false;
+    },
+
+    // 임시 함수
+    initAnnotation(index) {
+      this.$refs.annotation[index].initAnnotation()
     }
   },
   computed: {
@@ -599,10 +637,13 @@ export default {
     }
   },
   watch: {
+
     color() {
+      console.log("[watch][CategoryPanel][color]")
       this.setColor();
     },
     opacity() {
+      console.log("[watch][CategoryPanel][opacity]")
       let annotations = this.$refs.annotation;
       if (annotations == null) return;
 
@@ -610,17 +651,25 @@ export default {
     },
     isVisible(newVisible) {
       let annotations = this.$refs.annotation;
+      console.log("[CategoryPanel][watch][isVisible] - newVisible")
+      console.log(newVisible)
+      console.log("[CategoryPanel][watch][isVisible] - this.$refs.annotation")
+      console.log(this.$refs.annotation)
       if (annotations == null) return;
 
+      console.log("[CategoryPanel][watch][isVisible] - annotations")
+      console.log(annotations)
       annotations.forEach(a => {
-        a.keypoints.visible = newVisible;
+        // a.keypoints.visible = newVisible;
         a.isVisible = newVisible;
       });
       this.setColor();
     },
     showAnnotations(showing) {
+      console.log("[watch][CategoryPanel][showAnnotations] - showing")
+      console.log(showing)
       if (!showing) {
-        console.log("click - 요기6")
+        console.log("[CategoryPanel][showAnnotations]")
         this.$emit("clickcategory", {
           annotation: -1,
           keypoint: -1,
@@ -630,6 +679,7 @@ export default {
       this.setColor();
     },
     category() {
+      console.log("[watch][CategoryPanel][category]")
       this.initCategory();
     }
   },
@@ -654,14 +704,40 @@ export default {
       }
     }
   },
+  created() {
+    console.log('[created][CategoryPanel] - index : ' + this.index)
+    console.log('[created][CategoryPanel] - key : ' + this.test)
+    console.log('[created][CategoryPanel] - category : ')
+    console.log(this.category)
+    // + 버튼 누르면 category 정보 세팅해주는건데, 그냥 create 시 바로 하자.
+    this.createAnnotation()
+
+    // if(this.category.annotations == []) {
+    //   // 어?! 근데 createAnnotation 을 안하면, tool을 못쓰네??
+    //   console.log('[created][CategoryPanel] - call(createAnnotation)')
+    //   this.createAnnotation()
+    // }
+  },
   mounted() {
+    console.log('[mounted][CategoryPanel] - index : ' + this.index)
+    console.log('[mounted][CategoryPanel] - key : ' + this.test)
     this.initCategory();
     $(this.$refs.category_settings).on(
       "hidden.bs.modal", this.resetCategorySettings);
     this.isMounted = true;
 
-    // + 버튼 누르면 category 정보 세팅해주는건데, 그냥 mount 시 바로 하자.
-    this.createAnnotation()
+    console.log('[mounted][CategoryPanel] - ref.annotation')
+    console.log(this.$refs.annotation)
+
+    // if(this.category.annotations == []) {
+    //   // 어?! 근데 createAnnotation 을 안하면, tool을 못쓰네??
+    //   console.log('[created][CategoryPanel] - call(createAnnotation)')
+    //   this.createAnnotation()
+    // }
+  },
+  unmounted() {
+    console.log('[unmounted][CategoryPanel] - index : ' + this.index)
+    console.log('[unmounted][CategoryPanel] - key : ' + this.test)
   }
 };
 </script>
