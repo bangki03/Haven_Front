@@ -507,6 +507,14 @@
           this.index_image.end = Math.min(4, data.total)
 
           this.datalist = data.items.slice(0, this.index_image.num_items)
+
+          // 배포용 data url (배포 시, 주석 해제)
+          for (const [index, items] of this.datalist.entries()) {
+            this.datalist[index].image_file_path =  "/data/" + items.image_file_path.split('/').slice(3).join('/')
+          }
+
+
+
           console.log(this.datalist)
 
           console.log("[load_annotator] - this.index_image.num_items : " + this.index_image.num_items)
@@ -540,6 +548,10 @@
         this.current.category = 0
         this.current.annotation = -1
         // this.categories[0].annotations = []
+
+        // console.log("[TEST] : "+ data.image_file_path)
+        // var newPath =  data.image_file_path.split('/').slice(2).join('/')
+        // this.image.url = newPath
 
         this.image.url = data.image_file_path
         this.image.filename = data.image_file_path
@@ -579,55 +591,6 @@
 
         ///////////////////////////////////
         this.selected_Thumbnail = data
-
-      },
-
-      setThumbnailToThisImage(data) {
-        console.log("[setThumbnailToThisImage]")
-        this.image.raster = {}
-        console.log("[setThumbnailToThisImage] - set image raster {}")
-        this.image.scale = 0
-        // this.image.metadata = {}
-        this.image.ratio = 0
-        this.image.rotate = 0
-        this.image.id = null
-        this.image.categoryIds = [6],
-        this.image.data = [],
-        this.image.previous= null,
-        this.image.next = null,
-
-        this.image.url = data.image_file_path
-        this.image.filename = data.image_file_path
-        console.log("setThumbnailToThisImage : imageurl : " + this.image.url)
-
-        // let tmp_image = new Image();
-        // tmp_image.src = this.image.url
-
-        // if(tmp_image.complete) {
-        //   this.image.width = tmp_image.width
-        //   this.image.height = tmp_image.height
-        // }
-        // else{
-        //   console.log("비상!!!! 이미지 width, height 없다!!!!")
-        // }
-
-        // raster: {},
-        // scale: 0,
-        // metadata: {},
-        // ratio: 0,
-        // rotate: 0,
-        // id: null,
-        // url: "",
-        // dataset: 0,
-        // previous: null,
-        // next: null,
-        // filename: "",
-        // categoryIds: [],
-        // data: null,
-
-        // // 추가
-        // width: 0,
-        // height: 0,
 
       },
 
@@ -1211,7 +1174,7 @@
 
         let data = {
           image: {
-            path: this.image.url,
+            path: this.image.filename,
             width: this.image.raster.width,
             height: this.image.raster.height,
           },

@@ -1,4 +1,5 @@
 <template>
+  <div style="display:none;">version: A.05 / Date: 2023-05-21 15:30</div>
   <RouterView>  </RouterView>
 
 </template>
