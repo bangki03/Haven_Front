@@ -1218,7 +1218,7 @@
           method: "GET",
           dataType: "json",
           data: {
-            image_path: this.image.url,
+            image_path: "/iQ.Platform" + this.image.url,
           },
         })
         .then((data) => {
