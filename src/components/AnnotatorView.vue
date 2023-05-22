@@ -354,10 +354,10 @@
           rotate: 0,
           id: null,
           url: "",
+          filename: "",
           dataset: 0,
           previous: null,
           next: null,
-          filename: "",
           categoryIds: [],
           data: null,
 
@@ -490,8 +490,8 @@
           method: "GET",   // HTTP 요청 메소드(GET, POST 등)
           dataType: "json", // 서버에서 보내줄 데이터의 타입
           data: {
-              // project_id: this.$store.state.project.id,
-              project_id: 1,
+              project_id: this.$store.state.project.id,
+              // project_id: 1,
               start_date: this.filter.start_date,
               end_date: this.filter.end_date,
               predict_result: this.filter.predict_result,
@@ -509,31 +509,13 @@
           this.datalist = data.items.slice(0, this.index_image.num_items)
 
           // 배포용 data url (배포 시, 주석 해제)
+          // let project_id = this.$store.state.project.id
           for (const [index, items] of this.datalist.entries()) {
-            this.datalist[index].image_file_path =  "/data/" + items.image_file_path.split('/').slice(3).join('/')
+            this.datalist[index].id = items.id
+            this.datalist[index].image_file_path_origin =  items.image_file_path
+            this.datalist[index].image_file_path =  items.image_file_path.split('/').slice(3).join('/')
+            // /iQ.Platform/projects/1/data/2023-05-22/16-03-53/49_origin.jpg -> slice(4) /1/data/2023-05-22/16-03-53/49_origin.jpg 이렇게 요청됨
           }
-
-
-
-          console.log(this.datalist)
-
-          console.log("[load_annotator] - this.index_image.num_items : " + this.index_image.num_items)
-          console.log("[load_annotator] - this.index_image.start : " + this.index_image.start)
-          console.log("[load_annotator] - this.index_image.end : " + this.index_image.end)
-
-          // 임시 Test 용
-
-          // this.datalist[0].image_file_path = "/iQ.Platform/data/2023-05-04/17:36:48/01_image.jpg"
-          // this.datalist[1].image_file_path = "/iQ.Platform/data/2023-05-04/17:36:48/02_image.jpg"
-          // this.datalist[2].image_file_path = "/iQ.Platform/data/2023-05-04/17:36:48/03_image.jpg"
-          // this.datalist[3].image_file_path = "/iQ.Platform/data/2023-05-04/17:36:48/04_image.jpg"
-
-
-          // this.$store.commit("setLogin", this.prop_account);
-          // this.$store.commit("setUserID", data)
-          // this.$store.commit("saveSessionStorageLogin")
-          // console.log("Login")
-          // this.$router.push('/mypage')
         })
 
       },
@@ -553,8 +535,9 @@
         // var newPath =  data.image_file_path.split('/').slice(2).join('/')
         // this.image.url = newPath
 
+        this.image.id = data.id
         this.image.url = data.image_file_path
-        this.image.filename = data.image_file_path
+        this.image.filename = data.image_file_path_origin
         console.log("[click_ThumbnailCard] set image url : " + this.image.url)
         this.load_annotator() // 완료되면 얘가 current.annotation = 0 로 바꿔줌
 
@@ -1174,6 +1157,7 @@
 
         let data = {
           image: {
+            id: this.image.id,
             path: this.image.filename,
             width: this.image.raster.width,
             height: this.image.raster.height,
@@ -1205,6 +1189,7 @@
           .post(this.API_List.annotator_save, JSON.stringify(data))
           .then(() => {
             //TODO: updateUser
+            alert('saved!')
             if (callback != null) callback();
           })
           // .finally(() => this.removeProcess(process));
@@ -1218,7 +1203,7 @@
           method: "GET",
           dataType: "json",
           data: {
-            image_path: "/iQ.Platform" + this.image.url,
+            image_path: "/iQ.Platform/projects/" + this.image.url,
           },
         })
         .then((data) => {
