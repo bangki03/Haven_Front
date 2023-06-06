@@ -7,12 +7,22 @@ import paper from "paper";
 import VTooltip from "v-tooltip";
 import Loading from "vue-loading-overlay";
 // import VueTouch from 'vue-touch'
+import VueAwesomePaginate from "vue-awesome-paginate";
 
 
 import "bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "vue-toastr-2/dist/vue-toastr-2.min.css";
 // import "vue-loading-overlay/dist/vue-loading.css";
+import "vue-awesome-paginate/dist/style.css";
+
+
+// vue-slider
+// import VueSlider from 'vue-slider-component'
+// import 'vue-slider-component/theme/default.css'
+
+// @vue-form/slider
+import "@vueform/slider/themes/default.css";
 
 
 paper.install(window);
@@ -20,7 +30,7 @@ window.toastr = require("toastr");
 
 const app = createApp(App)
 
-app.use(store).use(router).use(VTooltip).use(Loading)
+app.use(store).use(router).use(VTooltip).use(Loading).use(VueAwesomePaginate)
 app.mount("#app");
 
 app.mixin({

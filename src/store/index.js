@@ -16,10 +16,14 @@ export default createStore({
       product_name: "",
       project_type: "",
     },
+    menu: {
+      index: 0,
+    },
     undo: [],
   },
   getters: {},
   mutations: {
+    //// Login 정보 ////
     loadSessionStorageLogin(state) {
       if(sessionStorage.getItem("account") != "undefined" && sessionStorage.getItem("account") != "null" && sessionStorage.getItem("account") != null) {
         state.account = JSON.parse(sessionStorage.getItem("account"))
@@ -51,6 +55,20 @@ export default createStore({
       sessionStorage.removeItem("account");
     },
 
+    //// Project 정보 ////
+    loadSessionStorageProject(state) {
+      if(sessionStorage.getItem("project") != "undefined" && sessionStorage.getItem("project") != "null" && sessionStorage.getItem("project") != null) {
+        state.project = JSON.parse(sessionStorage.getItem("project"))
+      }
+    },
+    saveSessionStorageProject(state) {
+      sessionStorage.setItem("project", JSON.stringify(state.project))
+      
+      console.log('#### store - saveProjectSession')
+      console.log(state.project)
+      console.log("############################")
+    },
+
     setProject(state, data) {
       state.project.id = data.id
       state.project.project_name = data.project_name
@@ -65,8 +83,25 @@ export default createStore({
       console.log("############################")
     },
 
+    //// Page 정보 ////
+    loadSessionStorageMenu(state) {
+      if(sessionStorage.getItem("indexMenu") != "undefined" && sessionStorage.getItem("indexMenu") != "null" && sessionStorage.getItem("indexMenu") != null) {
+        console.log("loadSessionStorageMenu")
+        state.menu = JSON.parse(sessionStorage.getItem("indexMenu"))
+      }
+    },
+    saveSessionStorageMenu(state) {
+      sessionStorage.setItem("indexMenu", JSON.stringify(state.menu))
+      console.log("saveSessionStorageMenu")
+    },
+    
+    setMenu(state, index) {
+      state.menu.index = index
 
-
+      console.log("#### store - setMenu ####")
+      console.log(index)
+      console.log("############################")
+    },
 
 
     addUndo(state, action) {

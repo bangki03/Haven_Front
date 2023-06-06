@@ -1,5 +1,5 @@
 <template>
-  <div><i v-tooltip.right='tooltip' class='fa fa-x' :class='icon' :style='{ color: iconColor, fontSize: fontSize + "px" }' @click='click'></i><br></div>
+  <div><i v-tooltip.right='tooltip' class='fa' :class='icon' :style='{ color: iconColor, fontSize: fontSize + "px" }' @click='click'></i><br></div>
 </template>
 
 <script>

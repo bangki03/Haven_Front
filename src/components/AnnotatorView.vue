@@ -1,16 +1,26 @@
 <template>
 
-  <div style="display:flex; flex-direction: row; align-items: center; width:100%; height:calc( 100% - 65px ); background-color: #EFF0F6;">
+  <div style="display:flex; flex-direction: row; align-items: center; width:100%; height:calc( 100% ); background-color: #EFF0F6;">
     <div style="display:flex; flex-direction:column; justify-content: space-around; align-items: center; width:82%; height:100%; background-color: #EFF0F6;">
       <div class="border-card" id="filter-container" style="display:flex; flex-direction: row; width:98%; height:18%; background-color: white;">
-        <div style="width:50%; height:100%; display:flex; flex-direction: column; justify-content: space-around;">
+        <div style="width:60%; height:100%; display:flex; flex-direction: column; justify-content: space-around;">
           <div class="filter-row">
             <div class="filter-title">조회 기간</div>
             <div class="filter-item" :class="{ active: selectedFilter1 === 0 }" @click="selectFilter1(0)">지난 7일간</div>
             <div class="filter-item" :class="{ active: selectedFilter1 === 1 }" @click="selectFilter1(1)">지난 30일간</div>
             <div class="filter-item" :class="{ active: selectedFilter1 === 2 }" @click="selectFilter1(2)">지난 6개월간</div>
             <div class="filter-item" :class="{ active: selectedFilter1 === 3 }" @click="selectFilter1(3)">지난 1년간</div>
-            <div class="filter-item" :class="{ active: selectedFilter1 === 4 }" @click="selectFilter1(4)">날짜 직접 선택</div>
+            <Datepicker class="datePicker" id="Datepicker" :class="{ active: selectedFilter1 === 4 }"
+              v-model="calendarPicker.DateRange"
+              :range='true'
+              :lang="'en'"
+              :firstDayOfWeek="'monday'"
+              :date-format="{
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric' }"
+              :placeholder="'날짜 직접 선택'"
+              circle/>
           </div>
           <div class="filter-row">
             <div class="filter-title">판정 결과</div>
@@ -29,10 +39,14 @@
             <div class="filter-item" :class="{ active: selectedFilter4 === 1 }" @click="selectFilter4(1)">NO</div>
           </div>
         </div>
-        <div style="width:50%; height:100%; display:flex; flex-direction: column; justify-content: flex-start; margin-top: 4px; margin-right: 1em;">
+        <div style="width:40%; height:100%; display:flex; flex-direction: column; justify-content: flex-start; margin-top: 4px; margin-right: 1em;">
           <div class="filter-row" style="justify-content: flex-end;">
-            <div class="filter-item" style="border-radius: 0.25rem; background-color: #F8F8FA;">2022-10-23 ~ 2022-10-29</div>
-            <div class="filter-item" style="border-radius: 0.25rem; background-color: #F8F8FA;">000 건 중 000건 완료 ( 00 %)</div>
+            <div class="filter-item" style="border-radius: 0.25rem; background-color: #F8F8FA; cursor: default;">{{ this.filter.start_date }} ~ {{ this.filter.end_date }}</div>
+            <div class="filter-item" style="border-radius: 0.25rem; background-color: #F8F8FA; cursor: default;">
+              {{ num_items.total }}건 중 {{ num_items.label_yes }}건 완료
+              <span v-if="num_items.total !== 0">( {{ num_items.ratio_label }} %)</span>
+              <span v-else>( 0 %)</span>
+            </div>
           </div>
         </div>
       </div>
@@ -129,41 +143,51 @@
         </aside>
 
         <aside v-show="panels.show.right" class="right-panel">
-          <div v-show="mode == 'segment'">
 
-            <SelectTool
-              :selected="activeTool"
-              @update="activeTool = $event"
-              :scale="image.scale"
-              @setcursor="setCursor"
-              ref="select"
-            />
+          <!-- <BrushSizePanel :style="{ display: activeTool=='Brush' ? 'block' :'none' }"/> -->
 
-            <div style="height:40px;"></div>
+          <!-- <BrushSizePanel v-if="activeTool=='Brush'" @update="update_brush_radius" style="display:flex; justify-content: center; width: 84px; top:0;"/> -->
 
-            <BrushTool
-              :selected="activeTool"
-              @update="activeTool = $event"
-              :scale="image.scale"
-              @setcursor="setCursor"
-              ref="brush"
-            />
+          <BrushPanel :brush="$refs.brush" v-if="activeTool=='Brush'" @update="update_brush_radius" style="display:flex; justify-content: center; width: 84px; top:0;"/>
+          <EraserPanel :eraser="$refs.eraser" v-else-if="activeTool=='Eraser'" @update="update_eraser_radius" style="display:flex; justify-content: center; width: 84px; top:0;"/>
+          <div v-else style="height:200px;"></div>
 
-            <div style="height:40px;"></div>
 
-            <EraserTool
-              :selected="activeTool"
-              @update="activeTool = $event"
-              :scale="image.scale"
-              @setcursor="setCursor"
-              ref="eraser"
-            />
+          <div style="height:40px;"></div>
 
-            <div style="height:40px;"></div>
+          <SelectTool
+            :selected="activeTool"
+            @update="activeTool = $event"
+            :scale="image.scale"
+            @setcursor="setCursor"
+            ref="select"
+          />
 
-            <SaveButton />
+          <div style="height:40px;"></div>
 
-          </div>
+          <BrushTool
+            :selected="activeTool"
+            @update="activeTool = $event"
+            :scale="image.scale"
+            @setcursor="setCursor"
+            ref="brush"
+          />
+
+          <div style="height:40px;"></div>
+
+          <EraserTool
+            :selected="activeTool"
+            @update="activeTool = $event"
+            :scale="image.scale"
+            @setcursor="setCursor"
+            ref="eraser"
+          />
+
+          <div style="height:40px;"></div>
+
+          <SaveButton />
+          <div style="height:80px;"></div>
+
 
         </aside>
 
@@ -184,43 +208,50 @@
     v-for="(myImage) in this.datalist.slice(0,4)" :key="myImage"
     style="display:flex; flex-direction:column; align-items: center; justify-content: space-around; width:18%; height: 98%; background-color: white;"> -->
     <div class="border-card" id="thumbnail-container"
-    style="display:flex; flex-direction:column; align-items: center; justify-content: space-around; width:18%; height: 98%; background-color: white;">
-    <!-- <i
-        v-show="previousimage != null"
-        class="fa fa-arrow-left image-arrows"
-        style="float:left"
-        @click="route(previousimage)"
-      /> -->
-      <i
+    style="display:flex; flex-direction:column; align-items: center; justify-content: flex-start; width:18%; height: 99%; background-color: white;">
+      <!-- <div style="height: 30px; width:100%; display:flex; flex-direction: row; justify-content: center; align-items: center; margin: 1.5em auto 0.5em auto">
+        <vue-awesome-paginate
+            :total-items="this.index_image.num_items"
+            :items-per-page="4"
+            :max-pages-shown="1"
+            v-model="this.index_image.currentPage"
+            @click="click_page"
+        />
+     </div> -->
+     <v-pagination
+      v-model="this.index_image.currentPage"
+      :pages="this.index_image.num_pages"
+      :range-size="1"
+      active-color="#DCEDFF"
+      @update:modelValue="updatePaginationHandler"
+      style="margin: 1.0em auto;"
+    />
+
+
+      <!-- <i
         v-show=true
         id="arrow-previous"
-        class="fa fa-arrow-up image-arrows"
-        style="font-size: 30px; transform: scaleX(4); color: #6CC2FF;"
+        class="fa-solid fa-chevron-up"
+        style="font-size: 30px; transform: scaleX(6); color: #6CC2FF;"
         :style = "{ 'opacity' : index_image.start !==0 ? 100 : 0 }"
         @click="index_image.start !== 0 ? route_previous() : null"
-      />
+      /> -->
 
-      <div v-for="(myImage) in datalist.slice(index_image.start,index_image.end)" :key="myImage">
-        <AnnotatorThumbnailCard @click="click_ThumbnailCard($event, myImage)" :image_ThumbnailCard="myImage"
-        style="border-color: #BD7C4A ;"
-        :style="{ 'border-style': selected_Thumbnail === myImage ? 'solid' : 'none' }"
+      <div v-for="(myImage, index) in datalist.slice(index_image.start,index_image.end)" :key="myImage">
+        <AnnotatorThumbnailCard @click="click_ThumbnailCard($event, myImage, index)" :image_ThumbnailCard="myImage"
+        style="border-color: #BD7C4A ; margin: 0.4em auto;"
+        :style="{ 'border-style': selected_data.thumbnail === myImage ? 'solid' : 'none' }"
         ></AnnotatorThumbnailCard>
       </div>
 
       <!-- <i
-        v-show="nextimage != null"
-        class="fa fa-arrow-right image-arrows"
-        style="float:right"
-        @click="route(nextimage)"
-      /> -->
-      <i
         v-show=true
         id="arrow-next"
-        class="fa fa-arrow-down image-arrows"
-        style="font-size: 30px; transform: scaleX(4); color: #6CC2FF;"
+        class="fa-solid fa-chevron-down"
+        style="font-size: 30px; transform: scaleX(6); color: #6CC2FF;"
         :style = "{ 'opacity' : index_image.end !== index_image.num_items ? 100 : 0 }"
         @click="index_image.end !== index_image.num_items ? route_next() : null"
-      />
+      /> -->
     </div>
 
   </div>
@@ -240,16 +271,26 @@
 
   // import { mapMutations } from "vuex";
 
+  // Paginnation
+  import VPagination from "@hennge/vue3-pagination";
+  import "@hennge/vue3-pagination/dist/vue3-pagination.css";
+
+  // Calendar Picker
+  import VueDatepickerUi from 'vue-datepicker-ui';
+  import 'vue-datepicker-ui/lib/vuedatepickerui.css';
+
+
+  // Annotator Tool
   import SelectTool from "@/components/annotator/tools/SelectTool";
   import BrushTool from "@/components/annotator/tools/BrushTool";
   import EraserTool from "@/components/annotator/tools/EraserTool";
   import CategoryPanel from "@/components/annotator/CategoryPanel";
-
   import SelectPanel from "@/components/annotator/panels/SelectPanel";
   import BrushPanel from "@/components/annotator/panels/BrushPanel";
   import EraserPanel from "@/components/annotator/panels/EraserPanel";
-
   import SaveButton from "@/components/annotator/tools/SaveButton";
+
+
 
   export default {
     name: "AnnotationView",
@@ -263,6 +304,8 @@
       BrushPanel,
       EraserPanel,
       SaveButton,
+      VPagination,
+      Datepicker: VueDatepickerUi,
 
     },
     // setup() {
@@ -288,7 +331,17 @@
     // },
     data() {
       return {
-        selected_Thumbnail: null,
+        calendarPicker: {
+          DateRange: [
+            // new Date(),
+            // new Date()
+          ],
+
+        },
+
+        selected_data: {
+          thumbnail: null,
+        },
 
         tools: [],
         loading_created : true,
@@ -299,6 +352,13 @@
         selectedFilter3: -1,
         selectedFilter4: -1,
 
+        num_items: {
+          label_yes: 0,
+          label_no: 0,
+          total: 0,
+          ratio_label : 0,
+        },
+
         filter: {
           start_date: "",
           end_date: "",
@@ -306,11 +366,18 @@
           is_label: false,
           order_by: "",
           page: 1,
-          size: 50,
+          size: 100,
         },
         index_image: {
-          limit: 50,
+          limit: 100,
           num_items : 0,
+          num_items_per_page : 4,
+          num_pages : 0,
+
+          currentPage: 1,
+          index_inPage: 1,
+          index_inTotalList: 1,
+
           start: 0,
           end: 0,
         },
@@ -354,6 +421,7 @@
           rotate: 0,
           id: null,
           url: "",
+          url_origin: "",
           filename: "",
           dataset: 0,
           previous: null,
@@ -386,6 +454,17 @@
       };
     },
     methods: {
+      update_brush_radius(newRadius) {
+        this.$refs.brush.brush.pathOptions.radius = newRadius
+      },
+      update_eraser_radius(newRadius) {
+        this.$refs.eraser.eraser.pathOptions.radius = newRadius
+      },
+      updatePaginationHandler(page) {
+          this.currentPage = page
+          this.routePage(page)
+      },
+
       //////////////////////////////////// 임시 ////////////////////////////////////
       updateCurrentAnnotation(newAnnotation) {
         this.current.annotation = newAnnotation;
@@ -393,23 +472,25 @@
 
       //////////////////////////////////// Filter ////////////////////////////////////
       selectFilter_created() {
-        this.selectedFilter1 = 0
-        this.selectedFilter2 = 0
-        this.selectedFilter3 = 0
-        this.selectedFilter4 = 0
-
         let end_date = new Date()
         let start_date = new Date()
         start_date.setDate(end_date.getDate() - 7)
         this.filter.end_date = this.DateToString(end_date)
         this.filter.start_date = this.DateToString(start_date)
-        this.filter.predict_result = "ok"
+        this.filter.predict_result = "ng"
         this.filter.order_by = "create_time"
-        this.filter.is_label = true
+        this.filter.is_label = false
+
+
+        this.selectedFilter1 = 0
+        this.selectedFilter2 = 1
+        this.selectedFilter3 = 0
+        this.selectedFilter4 = 1
 
         this.load_data()
       },
       selectFilter1(index) {
+        console.log("selectFilter1!!!!")
         this.selectedFilter1 = index
         let end_date = new Date()
         let start_date = new Date()
@@ -426,9 +507,10 @@
           start_date.setFullYear(end_date.getFullYear() - 1)
         }
         else {
-          console.log("## [Filter] : else1")
+          console.log("날짜 직접선택")
+          start_date = this.calendarPicker.DateRange[0]
+          end_date = this.calendarPicker.DateRange[1]
         }
-
         this.filter.end_date = this.DateToString(end_date)
         this.filter.start_date = this.DateToString(start_date)
         // console.log(start_date)
@@ -485,6 +567,7 @@
       },
 
       load_data(){
+
         $.ajax({
           url: "http://183.105.120.175:30004/data", // 클라이언트가 HTTP 요청을 보낼 서버의 URL 주소
           method: "GET",   // HTTP 요청 메소드(GET, POST 등)
@@ -495,37 +578,93 @@
               start_date: this.filter.start_date,
               end_date: this.filter.end_date,
               predict_result: this.filter.predict_result,
-              is_label: this.filter.is_label,
+              is_label: !this.filter.is_label,
               order_by: this.filter.order_by,
               page: 1,
-              size: this.index_image.limit,
+              size: this.filter.size,
           },  // HTTP 요청과 함께 서버로 보낼 데이터
         })
         .then( (data) => {
-          this.index_image.num_items = Math.min(data.size, data.total)
-          this.index_image.start = 0
-          this.index_image.end = Math.min(4, data.total)
-
-          this.datalist = data.items.slice(0, this.index_image.num_items)
-
-          // 배포용 data url (배포 시, 주석 해제)
-          // let project_id = this.$store.state.project.id
-          for (const [index, items] of this.datalist.entries()) {
-            this.datalist[index].id = items.id
-            this.datalist[index].image_file_path_origin =  items.image_file_path
-            this.datalist[index].image_file_path =  items.image_file_path.split('/').slice(3).join('/')
-            // /iQ.Platform/projects/1/data/2023-05-22/16-03-53/49_origin.jpg -> slice(4) /1/data/2023-05-22/16-03-53/49_origin.jpg 이렇게 요청됨
+          if(!this.filter.is_label == true) {
+            this.num_items.label_yes = data.total
           }
+          else {
+            this.num_items.label_no = data.total
+          }
+
+          return $.ajax({
+            url: "http://183.105.120.175:30004/data", // 클라이언트가 HTTP 요청을 보낼 서버의 URL 주소
+            method: "GET",   // HTTP 요청 메소드(GET, POST 등)
+            dataType: "json", // 서버에서 보내줄 데이터의 타입
+            data: {
+                project_id: this.$store.state.project.id,
+                // project_id: 1,
+                start_date: this.filter.start_date,
+                end_date: this.filter.end_date,
+                predict_result: this.filter.predict_result,
+                is_label: this.filter.is_label,
+                order_by: this.filter.order_by,
+                page: 1,
+                size: this.filter.size,
+            },  // HTTP 요청과 함께 서버로 보낼 데이터
+          })
+          .then( (data) => {
+            if(this.filter.is_label == true) {
+              this.num_items.label_yes = data.total
+            }
+            else {
+              this.num_items.label_no = data.total
+            }
+            this.num_items.total = this.num_items.label_yes + this.num_items.label_no
+            this.num_items.ratio_label = Math.floor(this.num_items.label_yes / this.num_items.total * 100)
+
+
+            this.index_image.num_items = Math.min(data.size, data.total)
+            this.index_image.num_pages = Math.floor(this.index_image.num_items / this.index_image.num_items_per_page)
+
+            this.index_image.start = 0
+            this.index_image.end = Math.min(this.index_image.num_items_per_page, data.total)
+
+            this.datalist = data.items.slice(0, this.index_image.num_items)
+
+            // 배포용 data url (배포 시, 주석 해제)
+            // let project_id = this.$store.state.project.id
+            for (const [index, items] of this.datalist.entries()) {
+              this.datalist[index].id = items.id
+              this.datalist[index].image_file_path_origin =  items.image_file_path
+
+              // 배포
+              this.datalist[index].image_file_path =  items.image_file_path.split('/').slice(3).join('/')
+              this.datalist[index].image_filename =  items.image_file_path.split('/').slice(2).join('/')
+              // console.log("FileName 확인하자!!! : " + items.image_file_path.split('/').slice(3).join('/'))
+              // /iQ.Platform/projects/1/data/2023-05-22/16-03-53/49_origin.jpg -> slice(4) /1/data/2023-05-22/16-03-53/49_origin.jpg 이렇게 요청됨
+
+              //test
+              // this.datalist[index].image_file_path =  items.image_file_path
+              // this.datalist[index].image_filename =  items.image_file_path.split('/').slice(5).join('/')
+            }
+
+            if(this.index_image.num_items > 1) {
+              this.click_ThumbnailCard_by_Index(1)
+            }
+          })
         })
+
+
 
       },
 
       //////////////////////////////////////////////////////////////////////////////////
 
       //////////////////////////////////// Thumbnail ////////////////////////////////////
-      click_ThumbnailCard(event, data) {
+      click_ThumbnailCard(event, data, index) {
         // paper & canvas 초기화
-        console.log("[click_ThumbnailCard]")
+        this.index_image.index_inPage = index + 1
+        this.index_image.index_inTotalList = (this.index_image.currentPage - 1) * this.index_image.num_items_per_page + this.index_image.index_inPage
+        console.log("[click_ThumbnailCard] page: " + this.index_image.currentPage)
+        console.log("[click_ThumbnailCard] index_inPage: " + this.index_image.index_inPage)
+        console.log("[click_ThumbnailCard] index_inTotalList: " + this.index_image.index_inTotalList)
+
 
         this.current.category = 0
         this.current.annotation = -1
@@ -536,14 +675,17 @@
         // this.image.url = newPath
 
         this.image.id = data.id
+        this.image.url_origin = data.image_file_path_origin
         this.image.url = data.image_file_path
-        this.image.filename = data.image_file_path_origin
+        this.image.filename = data.image_filename
         console.log("[click_ThumbnailCard] set image url : " + this.image.url)
         this.load_annotator() // 완료되면 얘가 current.annotation = 0 로 바꿔줌
 
 
-        let canvas = document.getElementById("editor");
 
+        let canvas = document.getElementById("editor");
+        let width = canvas.offsetWidth
+        let height = canvas.offsetHeight
         // 이전에 생성된 editor 요소 제거
         if (canvas) {
           canvas.parentNode.removeChild(canvas);
@@ -555,7 +697,10 @@
         newEditor.classList.add("canvas");
         newEditor.setAttribute("id", "editor");
         newEditor.setAttribute("ref", "image");
-        newEditor.setAttribute("resize", "");
+        // newEditor.setAttribute("resize", "");
+        newEditor.width = width;
+        newEditor.height = height;
+
 
         // editor를 추가할 부모 요소를 찾아 새로운 editor 요소를 추가
         let parentElement = document.querySelector("#frame");
@@ -573,7 +718,75 @@
 
 
         ///////////////////////////////////
-        this.selected_Thumbnail = data
+        this.selected_data.thumbnail = data
+
+      },
+
+      click_ThumbnailCard_by_Index(index) {
+        this.index_image.currentPage = Math.floor(index / 4) + 1
+        this.index_image.index_inPage = index % 4
+        this.index_image.index_inTotalList = index
+
+        console.log("[click_ThumbnailCard_by_Index] page: " + this.index_image.currentPage)
+        console.log("[click_ThumbnailCard_by_Index] index_inPage: " + this.index_image.index_inPage)
+        console.log("[click_ThumbnailCard_by_Index] index_inTotalList: " + this.index_image.index_inTotalList)
+
+        // if(index > this.datalist.length) {alert('Error(301)')}
+
+
+        this.current.category = 0
+        this.current.annotation = -1
+        // this.categories[0].annotations = []
+
+        // console.log("[TEST] : "+ data.image_file_path)
+        // var newPath =  data.image_file_path.split('/').slice(2).join('/')
+        // this.image.url = newPath
+
+        this.image.id = this.datalist[index-1].id
+        this.image.url_origin = this.datalist[index-1].image_file_path_origin
+        this.image.url = this.datalist[index-1].image_file_path
+        this.image.filename = this.datalist[index-1].image_filename
+        console.log("[click_ThumbnailCard] set image url : " + this.image.url)
+        this.load_annotator() // 완료되면 얘가 current.annotation = 0 로 바꿔줌
+
+
+
+        let canvas = document.getElementById("editor");
+        let width = canvas.offsetWidth
+        let height = canvas.offsetHeight
+        // 이전에 생성된 editor 요소 제거
+        if (canvas) {
+          canvas.parentNode.removeChild(canvas);
+        }
+
+        // 새로운 editor 요소 생성
+        // <canvas class="canvas" id="editor" ref="image" resize />
+        let newEditor = document.createElement("canvas");
+        newEditor.classList.add("canvas");
+        newEditor.setAttribute("id", "editor");
+        newEditor.setAttribute("ref", "image");
+        // newEditor.setAttribute("resize", "");
+        newEditor.width = width;
+        newEditor.height = height;
+
+
+        // editor를 추가할 부모 요소를 찾아 새로운 editor 요소를 추가
+        let parentElement = document.querySelector("#frame");
+        parentElement.appendChild(newEditor);
+
+        // 새로 생성된 editor 요소에 대한 작업을 수행
+        // 예: 초기 상태로 설정, 이벤트 리스너 등록 등
+
+        // 이제 canvas 변수는 새로운 editor 요소를 참조하게 됩니다.
+        canvas = newEditor;
+
+
+        this.initCanvas();
+        // this.getData();
+
+
+        ///////////////////////////////////
+        this.selected_data.thumbnail = this.datalist[index-1]
 
       },
 
@@ -764,6 +977,7 @@
           (canvas.width / parentX) * 0.95,
           (canvas.height / parentY) * 0.8
         );
+        console.log("this.paper.view.zoom: "+  this.paper.view.zoom)
 
         this.image.scale = 1 / this.paper.view.zoom;
         this.paper.view.setCenter(0, 0);
@@ -785,10 +999,12 @@
         console.log(canvas)
         this.paper.setup(canvas);
         this.paper.view.viewSize = [
+          // 100, 100
           // this.paper.view.size.width,
-          // window.innerWidth,
-          1296,
-          window.innerHeight
+          // window.innerWidth * 0.82 * 0.98,
+          // 1296,
+          // (window.innerHeight - 65 ) * 0.8,
+          canvas.offsetWidth, canvas.offsetHeight
         ];
         console.log("#################################### this.paper.view.viewSize ####################################")
         console.log(this.paper.view.viewSize)
@@ -873,6 +1089,7 @@
           this.text.topLeft.fontSize = fontSize;
           this.text.topLeft.fillColor = "white";
           this.text.topLeft.content = this.image.filename;
+          console.log("image.filename: "+this.image.filename)
 
           let positionTopRight = new paper.Point(
             width / 2,
@@ -1090,75 +1307,14 @@
       },
 
       //////////////////////////////////// Save ////////////////////////////////////
-      save(callback) {
-        console.log("Clicked SAVE!!!!!!!!!!!!!!!!!!!")
-        // let process = "Saving";
-        // this.addProcess(process);
-        let refs = this.$refs;
-
-        let data = {
-          mode: this.mode,
-          user: {
-            // bbox: this.$refs.bbox.export(),
-            // polygon: this.$refs.polygon.export(),
-            eraser: this.$refs.eraser.export(),
-            brush: this.$refs.brush.export(),
-            // magicwand: this.$refs.magicwand.export(),
-            select: this.$refs.select.export(),
-            // settings: this.$refs.settings.export()
-          },
-          dataset: this.dataset,
-          image: {
-            id: this.image.id,
-            // metadata: this.$refs.settings.exportMetadata(),
-            settings: {
-              selectedLayers: this.current
-            },
-            category_ids: []
-          },
-          settings: {
-            activeTool: this.activeTool,
-            zoom: this.zoom,
-            tools: {}
-          },
-          categories: []
-        };
-
-        if (refs.category != null && this.mode === "segment") {
-          this.image.categoryIds = [];
-          refs.category.forEach(category => {
-            let categoryData = category.export();
-            data.categories.push(categoryData);
-
-            if (categoryData.annotations.length > 0) {
-              let categoryIds = this.image.categoryIds;
-              if (categoryIds.indexOf(categoryData.id) === -1) {
-                categoryIds.push(categoryData.id);
-              }
-            }
-          });
-        }
-
-        data.image.category_ids = this.image.categoryIds;
-
-        console.log(data)
-
-        axios
-          // .post("/api/annotator/data", JSON.stringify(data))
-          .post(this.API_List.annotator_save, JSON.stringify(data))
-          .then(() => {
-            //TODO: updateUser
-            if (callback != null) callback();
-          })
-          // .finally(() => this.removeProcess(process));
-      },
       save1(callback) {
         let refs = this.$refs;
 
         let data = {
+          label_user_name: this.$store.state.account.Name,
           image: {
             id: this.image.id,
-            path: this.image.filename,
+            path: this.image.url_origin,
             width: this.image.raster.width,
             height: this.image.raster.height,
           },
@@ -1190,6 +1346,8 @@
           .then(() => {
             //TODO: updateUser
             alert('saved!')
+            this.click_ThumbnailCard_by_Index(this.index_image.index_inTotalList + 1)
+
             if (callback != null) callback();
           })
           // .finally(() => this.removeProcess(process));
@@ -1203,7 +1361,11 @@
           method: "GET",
           dataType: "json",
           data: {
+            // 배포
             image_path: "/iQ.Platform/projects/" + this.image.url,
+
+            // test
+            // image_path: this.image.url,
           },
         })
         .then((data) => {
@@ -1349,6 +1511,11 @@
         console.log("[AnnotatorView][route][previous] - this.index_image.end : " + this.index_image.end)
 
       },
+      routePage(page) {
+        console.log("routePage: " + page)
+        this.index_image.start = (page - 1) * this.index_image.num_items_per_page
+        this.index_image.end = page * this.index_image.num_items_per_page;
+      },
 
 
       //////////////////////////////////// Test - API ////////////////////////////////////
@@ -1381,6 +1548,12 @@
 
     },
     watch: {
+      'calendarPicker.DateRange'() {
+        console.log(typeof(this.calendarPicker.DateRange[1]))
+        if(typeof(this.calendarPicker.DateRange[0]) != 'undefined' && typeof(this.calendarPicker.DateRange[1]) != 'undefined'){
+          this.selectFilter1(4)
+        }
+      },
       'index_image.num_items'() {
         console.log("this.index_image.num_items : " + this.index_image.num_items)
         console.log("this.index_image.start : " + this.index_image.start)
@@ -1581,13 +1754,59 @@
       console.log("Check if the getAnnotation set well - 2-1. this.$refs.category[0].$refs")
       console.log(this.$refs.category[0].$refs)
 
+
+
+      console.log("RightNoW!!!!!!!!!!!!!!!!!!")
+      console.log("activeTool: " + this.activeTool)
     },
 
   };
 </script>
 
 
-  <style scoped>
+<style scoped>
+.datePicker {
+  --v-calendar-datepicker-icon-size: 0rem;
+  --v-calendar-input-font-size: 0.875rem;
+  --v-calendar-input-bg-color: #F0F0F5;
+  --v-calendar-input-text-color: black;
+  --v-calendar-input-border: 1px solid transparent;
+  --v-calendar-input-font-weight: bold;
+
+  font-family: 'NotoSansKR-Light';
+
+  width: 250px;
+  cursor: pointer;
+}
+.datePicker.active {
+  --v-calendar-input-bg-color: #1B7CFE;
+  --v-calendar-input-text-color: white;
+}
+#datePicker .input
+/* vuedatepickerui.css 라이브러리 원본파일의  여기의
+.v-calendar .input-field input {
+  padding-left: 40px -> 0.5rem
+  padding-right: 20px -> 0.5rem
+
+  border-radius: 6px -> 1.0rem
+  height: 50px -> 32px
+  cursor: pointer; 추가
+  text-align:center; 추가
+}
+
+
+.v-calendar .input-field.long {
+  min-width:290px -> 175px;
+  cursor: pointer; 추가
+}
+
+.v-calendar .input-field input::placeholder {
+  color:black;
+}  추가
+
+로 수정했다 */
+
+
 .border-card {
   border: #E7E7EE solid 1px;
   border-radius: 1em;

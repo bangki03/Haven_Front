@@ -61,9 +61,13 @@ export default {
   },
   methods: {
     routespage() {
+      console.log("routespage")
       if (!this.$store.state.account.LoginActive) {
         alert("Please, Login First")
         this.$router.push('/')
+      }
+      else{
+        alert(this.$store.state.account.LoginActive)
       }
     },
     Logout() {
@@ -77,7 +81,7 @@ export default {
 
   },
 
-  mounted() {
+  created() {
     this.routespage()
   },
 

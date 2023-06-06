@@ -1,5 +1,5 @@
 <template>
-  <div><i v-tooltip.right='tooltip' class='fa fa-x' :class='icon' :style='{ color: iconColor, fontSize: fontSize + "px" }' @click='click'></i><br></div>
+  <div><i v-tooltip.right='tooltip' class='fa-solid fa-brush' :style='{ color: iconColor, fontSize: fontSize + "px" }' @click='click'></i><br></div>
 </template>
 
 <script>
@@ -17,7 +17,7 @@ export default {
   },
   data() {
     return {
-      icon: "fa-paint-brush",
+      icon: "fa-light fa-brush",
       name: "Brush",
       cursor: "none",
       fontSize: 40,
@@ -27,7 +27,7 @@ export default {
         pathOptions: {
           strokeColor: "white",
           strokeWidth: 1,
-          radius: 5
+          radius: 10
         }
       },
       selection: null
@@ -53,6 +53,7 @@ export default {
       this.brush.path.position = point;
     },
     createBrush(center) {
+      console.log("createBrush: " + this.brush.pathOptions.radius)
       center = center || new paper.Point(0, 0);
 
       this.brush.path = new paper.Path.Circle({

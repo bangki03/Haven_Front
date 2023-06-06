@@ -4,8 +4,9 @@
             id="Icon_Project_Preview_Application"
             :src= this.image_ThumbnailCard.image_file_path
             alt="../assets/TestSampleImage.png"
-            style=" width: 200px; padding: 0;"
+            style=" width: 220px; padding: 0;"
         />
+        <div>{{ image_ThumbnailCard.image_filename }}</div>
     </div>
 
 </template>

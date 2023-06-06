@@ -24,7 +24,7 @@
 
       <!-- <div class="row" style="margin-top: 1.0em; opacity: 0;"></div> -->
       <div class="row" style="height: 48%; width:90%; background-color: #F8F9FA;  margin: 1.0em auto 0 auto;">
-          <div class="col" style="background-color: #FFFFFF; border-radius: 0.5em; margin: 0 1em; padding:1em 0;"><MyPageProjectsView></MyPageProjectsView></div>
+          <div class="col" style="background-color: #FFFFFF; border-radius: 0.5em; margin: 0 1em; padding:1em 0 0.5em 0;"><MyPageProjectsView></MyPageProjectsView></div>
       </div>
 
       <!-- <div class="row" style="height: 2%; opacity: 0;"></div> -->
@@ -63,10 +63,14 @@ export default {
   },
   methods: {
     routespage() {
+      // console.log("routespage")
       if (!this.$store.state.account.LoginActive) {
         alert("Please, Login First")
         this.$router.push('/')
       }
+      // else{
+      //   alert(this.$store.state.account.LoginActive)
+      // }
     },
     Logout() {
       this.$store.commit("setLogout");
@@ -78,11 +82,11 @@ export default {
 
   },
 
-  mounted() {
-    // this.routespage()
+  created() {
+    this.routespage()
   },
 
-  created() {
+  mounted() {
   },
 
   beforeUnmount() {

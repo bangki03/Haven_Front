@@ -105,10 +105,23 @@
                 </div>
             </a>
 
+            <a href="#" class="d-flex align-items-center text-decoration-none" style="justify-content: flex-start;">
+                <div style="display:inline-flex; flex-direction: row; align-items: center; margin: 0.5em 0.5em 0.5em 1.0em; padding: 0; color: white;">
+                    <!-- <img
+                        id="Logo"
+                        src="../assets/LogOut.png"
+                        alt="../assets/LogOut.png"
+                        style="height: 17px;" @click="Logout"
+                    /> -->
+                    <i class="fa fa-sign-out" aria-hidden="true"></i>
+                    <p style="margin-bottom: 0; margin-left:0.75em;"> 로그아웃</p>
+                </div>
+            </a>
+
 
         </div>
 
-        <div style="width: calc(100vw - 200px); display:flex; flex-direction: column; justify-content: flex-start; background-color: #EFF0F6; ">
+        <!-- <div style="width: calc(100vw - 200px); display:flex; flex-direction: column; justify-content: flex-start; background-color: #EFF0F6; ">
             <div id="topbar2">
                 <div style="display:inline-flex; margin-right: 1em;">
                     <p style="margin-left: auto; margin-bottom:auto;" @click="Logout">로그아웃</p>
@@ -119,15 +132,12 @@
                         style="height: 15px; width: 15px; padding: 0; margin-top: 3px;" @click="Logout"
                     />
                 </div>
-
-                <div>
-
-                </div>
+        
             </div>
-
             <RouterView>  </RouterView>
+        </div> -->
 
-        </div>
+        <RouterView>  </RouterView>
 
     </div>
 </template>
@@ -143,13 +153,13 @@ export default{
     data() {
         return{
             showMenu: true,
-            selectedMenu : -1,
+            selectedMenu : 0,
         }
     },
     methods: {
         routespage() {
             if (!this.$store.state.account.LoginActive) {
-                alert("Please, Login First")
+                alert("Please, Login First!!!!")
                 this.$router.push('/')
             }
         },
@@ -161,6 +171,8 @@ export default{
 
         selectMenu(index) {
             this.selectedMenu = index
+            this.$store.commit('setMenu', index)
+            this.$store.commit("saveSessionStorageMenu")
 
             if(index == 0) {
                 this.$router.push('/project/annotate')
@@ -171,12 +183,15 @@ export default{
             else if (index == 2) {
                 this.$router.push('/project/test')
             }
+            console.log("qwer selectedMenu: " +this.selectedMenu)
         },
 
     },
-    mounted() {
+    created() {
         this.routespage()
-        this.selectMenu(0)
+        this.$store.commit('loadSessionStorageProject')
+        this.$store.commit('loadSessionStorageMenu')
+        this.selectMenu(this.$store.state.menu.index)
     },
 }
 

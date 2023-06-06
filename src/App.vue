@@ -1,5 +1,5 @@
 <template>
-  <div style="display:none;">version: A.05_rev4 / Date : 23.05.23 01:00</div>
+  <div style="display:none;">version: A.06 / Date : 23.06.06 16:00</div>
   <RouterView>  </RouterView>
 
 </template>
@@ -89,7 +89,11 @@ export default{
   src: url('assets/fonts/Poppins-SemiBold.ttf') format('truetype');
   font-weight: 600;
 }
-
+@font-face {
+  font-family:'Actor-Regular';
+  src: url('assets/fonts/Actor-Regular.ttf') format('truetype');
+  font-weight: 400;
+}
 
 
 /*

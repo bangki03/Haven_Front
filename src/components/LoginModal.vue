@@ -3,33 +3,32 @@
       <div style="width:60%;">
 
         <div v-if="!registerActive" class="login" v-bind:class="{ error: emptyFields }">
-        <h1>Sign In</h1>
+        <h1 style="color: #BD7C4A">로그인</h1>
         <form class="form-group" @submit.prevent="doLogin">
           <!-- <input v-model="prop_account.Email" type="email" class="form-control" placeholder="Email" required> -->
-          <input v-model="prop_account.Email" type="email" class="form-control" placeholder="Email" required>
-          <input v-model="prop_account.Password" type="password" class="form-control" placeholder="Password" required>
+          <input v-model="prop_account.Email" type="email" class="form-control" placeholder="이메일" required>
+          <input v-model="prop_account.Password" type="password" class="form-control" placeholder="비밀번호" required>
           <!-- <input type="submit" class="btn btn-primary" @click="doLogin"> -->
-          <input type="submit" class="btn btn-primary">
+          <input type="submit" class="btn" value="로그인" style="background-color: #BD7C4A; color:white;">
 
-          <p>Don't have an account? <a href="#" @click="registerActive = !registerActive, emptyFields = false">Sign up here</a>
+          <p><a href="#" @click="registerActive = !registerActive, emptyFields = false">회원가입</a>
           </p>
-          <p><a href="#">Forgot your password?</a></p>
         </form>
       </div>
 
       <div v-else class="register" v-bind:class="{ error: emptyFields }">
-        <h1>Sign Up</h1>
+        <h1 style="color: #BD7C4A">회원가입</h1>
         <form class="form-group" @submit.prevent="doRegister">
         <!-- <form class="form-group"> -->
-          <input v-model="reg_account.Email" type="email" class="form-control" placeholder="Email" required>
-          <input v-model="reg_account.Name" type="name" class="form-control" placeholder="Name" required>
-          <input v-model="reg_account.Password" type="password" class="form-control" placeholder="Password" required>
-          <input v-model="reg_account.Password_confirm" type="password" class="form-control" placeholder="Confirm Password" required>
-          <input v-model="reg_account.PhoneNumber" type="tel" class="form-control" placeholder="Phone Number" required>
+          <input v-model="reg_account.Email" type="email" class="form-control" placeholder="이메일" required>
+          <input v-model="reg_account.Name" type="name" class="form-control" placeholder="이름" required>
+          <input v-model="reg_account.Password" type="password" class="form-control" placeholder="비밀번호" required>
+          <input v-model="reg_account.Password_confirm" type="password" class="form-control" placeholder="비밀번호 확인" required>
+          <input v-model="reg_account.PhoneNumber" type="tel" class="form-control" placeholder="휴대폰 번호(010-OOOO-OOOO)" required>
           <!-- <input type="submit" class="btn btn-primary" @click="doRegister"> -->
-          <input type="submit" class="btn btn-primary">
+          <input type="submit" class="btn" value="가입하기" style="background-color: #BD7C4A; color:white;">
 
-          <p>Already have an account? <a href="#" @click="registerActive = !registerActive, emptyFields = false">Sign in here</a>
+          <p>계정이 이미 있으시다면? <a href="#" @click="registerActive = !registerActive, emptyFields = false">로그인</a>
           </p>
         </form>
       </div>
