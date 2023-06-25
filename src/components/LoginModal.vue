@@ -5,10 +5,8 @@
         <div v-if="!registerActive" class="login" v-bind:class="{ error: emptyFields }">
         <h1 style="color: #BD7C4A">로그인</h1>
         <form class="form-group" @submit.prevent="doLogin">
-          <!-- <input v-model="prop_account.Email" type="email" class="form-control" placeholder="Email" required> -->
-          <input v-model="prop_account.Email" type="email" class="form-control" placeholder="이메일" required>
-          <input v-model="prop_account.Password" type="password" class="form-control" placeholder="비밀번호" required>
-          <!-- <input type="submit" class="btn btn-primary" @click="doLogin"> -->
+          <input id="login_id" :value="prop_account.Email" @input="prop_account.Email = $event.target.value" type="email" @blur="saveInputValue" class="form-control" placeholder="이메일" required>
+          <input id="login_password" :value="prop_account.Password" @input="prop_account.Password = $event.target.value" @blur="saveInputValue" type="password" class="form-control" placeholder="비밀번호" required>
           <input type="submit" class="btn" value="로그인" style="background-color: #BD7C4A; color:white;">
 
           <p><a href="#" @click="registerActive = !registerActive, emptyFields = false">회원가입</a>
@@ -20,11 +18,11 @@
         <h1 style="color: #BD7C4A">회원가입</h1>
         <form class="form-group" @submit.prevent="doRegister">
         <!-- <form class="form-group"> -->
-          <input v-model="reg_account.Email" type="email" class="form-control" placeholder="이메일" required>
-          <input v-model="reg_account.Name" type="name" class="form-control" placeholder="이름" required>
-          <input v-model="reg_account.Password" type="password" class="form-control" placeholder="비밀번호" required>
-          <input v-model="reg_account.Password_confirm" type="password" class="form-control" placeholder="비밀번호 확인" required>
-          <input v-model="reg_account.PhoneNumber" type="tel" class="form-control" placeholder="휴대폰 번호(010-OOOO-OOOO)" required>
+          <input id="register_id" :value="prop_account.Email" @input="prop_account.Email = $event.target.value" @blur="saveInputValue" type="email" class="form-control" placeholder="이메일" required>
+          <input id="register_name" :value="prop_account.Name" @input="prop_account.EmaNameil = $event.target.value" @blur="saveInputValue" type="name" class="form-control" placeholder="이름" required>
+          <input id="register_password" :value="prop_account.Password" @input="prop_account.Password = $event.target.value" @blur="saveInputValue" type="password" class="form-control" placeholder="비밀번호" required>
+          <input id="register_passwordconfirm" :value="prop_account.Password_confirm" @input="prop_account.Password_confirm = $event.target.value" @blur="saveInputValue" type="password" class="form-control" placeholder="비밀번호 확인" required>
+          <input id="register_phonenNo" :value="prop_account.PhoneNumber" @input="prop_account.PhoneNumber = $event.target.value" @blur="saveInputValue" type="tel" class="form-control" placeholder="휴대폰 번호(010-OOOO-OOOO)" required>
           <!-- <input type="submit" class="btn btn-primary" @click="doRegister"> -->
           <input type="submit" class="btn" value="가입하기" style="background-color: #BD7C4A; color:white;">
 
@@ -66,6 +64,30 @@ export default{
   computed: {
   },
   methods: {
+    saveInputValue(event){
+      if(event.target.id == "login_id") {
+        this.prop_account.Email = event.target.value
+      }
+      else if(event.target.id == "login_password") {
+        this.prop_account.Password = event.target.value
+      }
+      else if(event.target.id == "register_id") {
+        this.prop_account.Email = event.target.value
+      }
+      else if(event.target.id == "register_name") {
+        this.prop_account.Name = event.target.value
+      }
+      else if(event.target.id == "register_password") {
+        this.prop_account.Password = event.target.value
+      }
+      else if(event.target.id == "register_passwordconfirm") {
+        this.prop_account.Password_confirm = event.target.value
+      }
+      else if(event.target.id == "register_phonenNo") {
+        this.prop_account.PhoneNumber = event.target.value
+      }
+
+    },
     doLogin() {
         if (this.prop_account.email === "" || this.prop_account.password === "") {
             this.emptyFields = true;

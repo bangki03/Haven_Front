@@ -4,9 +4,9 @@
             id="Icon_Project_Preview_Application"
             :src= this.image_ThumbnailCard.image_file_path
             alt="../assets/TestSampleImage.png"
-            style=" width: 220px; padding: 0;"
+            style=" width: 190px; padding: 0;"
         />
-        <div>{{ image_ThumbnailCard.image_filename }}</div>
+        <div style="font-size:0.8rem;">{{ filename }}</div>
     </div>
 
 </template>
@@ -15,8 +15,19 @@
 export default{
     props: ['image_ThumbnailCard'],
 
-    methods: {
+    data(){
+        return {
+            filename: ""    
+        }
+    },
 
+    methods: {
+        set_filename() {
+            this.filename = this.image_ThumbnailCard.image_filename.split("/")[2]
+        }
+    },
+    created() {
+        this.set_filename()
     },
     mounted() {
         console.log("### Test : Annotator Thumbnail Card : Path : " + this.image_ThumbnailCard.image_file_path)

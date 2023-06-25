@@ -6,8 +6,8 @@
 
     <div id="menu-contents">
 
-        <MyPageApplicationCard></MyPageApplicationCard>
-        <MyPageApplicationCard></MyPageApplicationCard>
+        <!-- <MyPageApplicationCard></MyPageApplicationCard>
+        <MyPageApplicationCard></MyPageApplicationCard> -->
 
     </div>
 
@@ -28,10 +28,10 @@
 </template>
 
 <script>
-import MyPageApplicationCard from "@/components/MyPageApplicationCard.vue"
+// import MyPageApplicationCard from "@/components/MyPageApplicationCard.vue"
 export default {
     components: {
-        MyPageApplicationCard
+        // MyPageApplicationCard
     }
 }
 </script>

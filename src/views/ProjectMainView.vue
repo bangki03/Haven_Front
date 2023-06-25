@@ -78,7 +78,12 @@
             </li>
             </ul>
 
-
+            <a href="#" class="d-flex align-items-center text-decoration-none" style="justify-content: flex-start;">
+                <div style="display:inline-flex; flex-direction: row; align-items: center; margin: 0.5em 0.5em 0.5em 1.0em; padding: 0; color: white;" @click="routeToAuthView">
+                    <i class="fa-solid fa-users" aria-hidden="true"></i>
+                    <p style="margin-bottom: 0; margin-left:0.75em;"> 구성원 관리</p>
+                </div>
+            </a>
 
             <a href="#" class="d-flex align-items-center text-decoration-none" style="justify-content: flex-start;">
                 <div style="display:inline-flex; flex-direction: row; align-items: center; margin: 0.5em 0.5em 0.5em 1.0em; padding: 0; color: white;">
@@ -132,7 +137,7 @@
                         style="height: 15px; width: 15px; padding: 0; margin-top: 3px;" @click="Logout"
                     />
                 </div>
-        
+
             </div>
             <RouterView>  </RouterView>
         </div> -->
@@ -185,6 +190,10 @@ export default{
             }
             console.log("qwer selectedMenu: " +this.selectedMenu)
         },
+
+        routeToAuthView() {
+            this.$router.push('/project/members')
+        }
 
     },
     created() {

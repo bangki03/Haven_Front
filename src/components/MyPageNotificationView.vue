@@ -6,9 +6,9 @@
 
     <div id="menu-contents">
 
+        <!-- <MyPageNotificationCard></MyPageNotificationCard>
         <MyPageNotificationCard></MyPageNotificationCard>
-        <MyPageNotificationCard></MyPageNotificationCard>
-        <MyPageNotificationCard></MyPageNotificationCard>
+        <MyPageNotificationCard></MyPageNotificationCard> -->
 
     </div>
 
@@ -28,10 +28,10 @@
 </template>
 
 <script>
-import MyPageNotificationCard from "@/components/MyPageNotificationCard.vue"
+// import MyPageNotificationCard from "@/components/MyPageNotificationCard.vue"
 export default {
     components: {
-        MyPageNotificationCard
+        // MyPageNotificationCard
     }
 }
 </script>

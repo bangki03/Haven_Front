@@ -1,5 +1,7 @@
 <template>
     <div style="width:100%; height:100%; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; background-color: #EFF0F6; padding-top:2em; padding-bottom: 2em;">
+        <p style="align-self: flex-start; margin-left: 2.0em; margin-top:0em;">학습된 AI 모델을 비교 검증 해보세요! 헤븐 관리자 님  👋  </p>
+
         <!-- <div style="width:98%; text-align: left;">
             여기는 AI 모델 학습 서비스입니다.
         </div> -->
@@ -25,7 +27,7 @@
                     <p class="column-header">신규 학습 가능 NG 데이터 수</p>
                     <p style="font-family: Poppins-SemiBold; font-size:1.5rem; margin-bottom:0;">{{ model_deployed.ng_data_count }}</p>
                 </div>
-                <div id="btn-deploy" style="margin-left: auto; margin-right: 3.0em;">
+                <div id="btn-deploy" style="margin-left: auto; margin-right: 3.0em;" @click="openModal" ref="mymodal" @blur="closeModal">
                     신규 모델 학습
                 </div>
             </div>
@@ -36,9 +38,9 @@
         <div class="dard-container" style="width:98%; height:700px; display:flex; flex-direction: column; justify-content: flex-start;">
             <div class="dard-header"></div>
             <div class="dard-main" style="display:flex; flex-direction: column; align-items: flex-start; overflow: hidden;">
-                <ModelInfoHeader style="height:30px; width:100%;"></ModelInfoHeader>
+                <ModelTrainModelInfoHeader style="height:30px; width:100%;"></ModelTrainModelInfoHeader>
                 <div v-for="modelInfo in this.modelList" :key="modelInfo.id" style="width:100%;" >
-                    <ModelInfoCard :modelInfo="modelInfo" style="width:100%; "></ModelInfoCard>
+                    <ModelTrainModelInfoCard :modelInfo="modelInfo" style="width:100%; "></ModelTrainModelInfoCard>
                 </div>
                 <div style="height: 30px; width:100%; display:flex; flex-direction: row; justify-content: center; align-items: center; margin: 1.5em auto 0.5em auto">
                     <vue-awesome-paginate
@@ -53,24 +55,28 @@
 
         </div>
 
-
+        <ModelTrainNewModal v-if="isModelTrainNewOpen" class="create-myProject" @closeModal="closeModal"></ModelTrainNewModal>
 
     </div>
 </template>
 
 <script>
 import $ from 'jquery';
-import ModelInfoHeader from '@/components/ModelInfoHeader.vue'
-import ModelInfoCard from '@/components/ModelInfoCard.vue'
+import ModelTrainModelInfoHeader from '@/components/ModelTrainModelInfoHeader.vue'
+import ModelTrainModelInfoCard from '@/components/ModelTrainModelInfoCard.vue'
+import ModelTrainNewModal from '@/components/ModelTrainNewModal.vue'
 // import { ref } from "vue";
 
 export default{
     components: {
-        ModelInfoHeader,
-        ModelInfoCard,
+        ModelTrainModelInfoHeader,
+        ModelTrainModelInfoCard,
+        ModelTrainNewModal,
     },
     data() {
         return {
+            isModelTrainNewOpen : false,
+
             modelList: [],
             currentPage: 1,
             size: 10,
@@ -81,9 +87,38 @@ export default{
                 ok_data_count: 0,
                 ng_data_count: 0,
             },
+
+
+            flag_IntervalAPILoadData : false,
+            IntervalAPILoadData : null,
         }
     },
     methods: {
+
+        // Cycle
+        Set_Interval_LoadData () {
+            // let period = this.config.monitoring_API_period
+            if(!this.flag_IntervalAPILoadData) {
+                this.IntervalAPILoadData = setInterval(this.load_modellist, 10000)
+                this.flag_IntervalAPILoadData = true
+                console.log("Set Periodically Load Model")
+            }
+        },
+        Clear_Interval_LoadData () {
+            if (this.flag_IntervalAPILoadData) {
+                clearInterval(this.IntervalAPILoadData)
+                this.flag_IntervalAPILoadData = false
+                console.log("Clear Periodically Load Model")
+            }
+        },
+
+        //
+        openModal(){
+            this.isModelTrainNewOpen = true;
+        },
+        closeModal(){
+            this.isModelTrainNewOpen = false;
+        },
         load_modellist() {
             $.ajax({
                 url: "http://183.105.120.175:30004/ai-model", // 클라이언트가 HTTP 요청을 보낼 서버의 URL 주소
@@ -98,6 +133,20 @@ export default{
             .then( data => {
                 this.modelList = data.items
                 this.total = data.total
+
+                // 학습 중인 것 있으면, Set_Interval_LoadData
+                let flag = false
+                for (let i=0; i<this.modelList.length; i++) {
+                    if(this.modelList[i].train_status ==  "TRAINING") {
+                        flag = true
+                        this.Set_Interval_LoadData()
+                        break
+                    }
+                }
+                // 없으면, Clear_Interval_LoadData
+                if(!flag) {
+                    this.Clear_Interval_LoadData()
+                }
             })
 
             // 임시 Test
@@ -172,6 +221,9 @@ export default{
     mounted() {
         this.load_modellist()
     },
+    beforeUnmount() {
+        this.Clear_Interval_LoadData()
+    }
 }
 
 </script>
@@ -188,7 +240,7 @@ export default{
 }
 .dard-main {
     width: 100%;
-    height: calc(inherit - 40px);
+    height: calc(100% - 40px);
 
     background-color: white;
 

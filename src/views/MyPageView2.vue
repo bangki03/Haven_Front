@@ -6,11 +6,11 @@
               id="Logo"
               src="../assets/Icon_Topbar.png"
               alt="../assets/Icon_Topbar.png"
-              style="margin-top:0.5em; margin-right:auto; height:calc(46px * 0.69);"
+              style="margin-top:0.5em; margin-right:auto; height:calc(46px * 1.0);"
           />
           </div>
 
-          <div style="display:flex; margin-top: 5px;">
+          <!-- <div style="display:flex; margin-top: 5px;">
             <p style="display:inline; margin-left: auto; margin-bottom:auto;" @click="Logout">로그아웃</p>
             <img
                 id="Logo"
@@ -18,6 +18,11 @@
                 alt="../assets/LogOut.png"
                 style="height: 15px; width: 15px; padding: 0; margin-top: 3px;" @click="Logout"
             />
+          </div> -->
+
+          <div style="display:inline-flex; flex-direction: row; align-items: top; margin: 0.5em 0.5em 0.5em 1.0em; padding: 0; color: white;">
+              <i class="fa fa-sign-out" aria-hidden="true" style="margin-top: 0.25rem;" @click="Logout"></i>
+              <p style="margin-bottom: 0; margin-left:0.75em;" @click="Logout"> 로그아웃</p>
           </div>
 
       </div>

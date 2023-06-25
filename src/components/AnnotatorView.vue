@@ -1,260 +1,267 @@
 <template>
+  <div style="width:100%; height:100%; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; background-color: #EFF0F6;">
+    <p style="align-self: flex-start; margin-left:2.0rem; margin-top:1.0rem; margin-bottom:0.5rem;">학습된 AI 모델을 비교 검증 해보세요! 헤븐 관리자 님  👋  </p>
 
-  <div style="display:flex; flex-direction: row; align-items: center; width:100%; height:calc( 100% ); background-color: #EFF0F6;">
-    <div style="display:flex; flex-direction:column; justify-content: space-around; align-items: center; width:82%; height:100%; background-color: #EFF0F6;">
-      <div class="border-card" id="filter-container" style="display:flex; flex-direction: row; width:98%; height:18%; background-color: white;">
-        <div style="width:60%; height:100%; display:flex; flex-direction: column; justify-content: space-around;">
-          <div class="filter-row">
-            <div class="filter-title">조회 기간</div>
-            <div class="filter-item" :class="{ active: selectedFilter1 === 0 }" @click="selectFilter1(0)">지난 7일간</div>
-            <div class="filter-item" :class="{ active: selectedFilter1 === 1 }" @click="selectFilter1(1)">지난 30일간</div>
-            <div class="filter-item" :class="{ active: selectedFilter1 === 2 }" @click="selectFilter1(2)">지난 6개월간</div>
-            <div class="filter-item" :class="{ active: selectedFilter1 === 3 }" @click="selectFilter1(3)">지난 1년간</div>
-            <Datepicker class="datePicker" id="Datepicker" :class="{ active: selectedFilter1 === 4 }"
-              v-model="calendarPicker.DateRange"
-              :range='true'
-              :lang="'en'"
-              :firstDayOfWeek="'monday'"
-              :date-format="{
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric' }"
-              :placeholder="'날짜 직접 선택'"
-              circle/>
+    <div style="display:flex; flex-direction: row; align-items: center; width:100%; height:calc( 100% - 3.5rem ); background-color: #EFF0F6;">
+      <div style="display:flex; flex-direction:column; justify-content: space-around; align-items: center; width:82%; height:100%; background-color: #EFF0F6;">
+        <div class="border-card" id="filter-container" style="display:flex; flex-direction: row; width:98%; height:18%; background-color: white;">
+          <div style="width:60%; height:100%; display:flex; flex-direction: column; justify-content: space-around;">
+            <div class="filter-row">
+              <div class="filter-title">조회 기간</div>
+              <div class="filter-item" :class="{ active: selectedFilter1 === 0 }" @click="selectFilter1(0)">지난 7일간</div>
+              <div class="filter-item" :class="{ active: selectedFilter1 === 1 }" @click="selectFilter1(1)">지난 30일간</div>
+              <div class="filter-item" :class="{ active: selectedFilter1 === 2 }" @click="selectFilter1(2)">지난 6개월간</div>
+              <div class="filter-item" :class="{ active: selectedFilter1 === 3 }" @click="selectFilter1(3)">지난 1년간</div>
+              <Datepicker class="datePicker" id="Datepicker" :class="{ active: selectedFilter1 === 4 }"
+                v-model="calendarPicker.DateRange"
+                :range='true'
+                :lang="'en'"
+                :firstDayOfWeek="'monday'"
+                :date-format="{
+                  day: '2-digit',
+                  month: '2-digit',
+                  year: 'numeric' }"
+                :placeholder="'날짜 직접 선택'"
+                circle/>
+            </div>
+            <div class="filter-row">
+              <div class="filter-title">판정 결과</div>
+              <div class="filter-item" :class="{ active: selectedFilter2 === 1 }" @click="selectFilter2(1)">OK</div>
+              <div class="filter-item" :class="{ active: selectedFilter2 === 2 }" @click="selectFilter2(2)">NG</div>
+            </div>
+            <div class="filter-row">
+              <div class="filter-title">데이터 정렬</div>
+              <div class="filter-item" :class="{ active: selectedFilter3 === 0 }" @click="selectFilter3(0)">시간</div>
+              <div class="filter-item" :class="{ active: selectedFilter3 === 1 }" @click="selectFilter3(1)">모델 불확실성</div>
+              <div class="filter-item disable" :class="{ active: selectedFilter3 === 2 }" @click="selectFilter3(2)">데이터 신규성</div>
+            </div>
+            <div class="filter-row">
+              <div class="filter-title">라벨링 유무</div>
+              <div class="filter-item" :class="{ active: selectedFilter4 === 0 }" @click="selectFilter4(0)">YES</div>
+              <div class="filter-item" :class="{ active: selectedFilter4 === 1 }" @click="selectFilter4(1)">NO</div>
+            </div>
           </div>
-          <div class="filter-row">
-            <div class="filter-title">판정 결과</div>
-            <div class="filter-item" :class="{ active: selectedFilter2 === 0 }" @click="selectFilter2(0)">OK</div>
-            <div class="filter-item" :class="{ active: selectedFilter2 === 1 }" @click="selectFilter2(1)">NG</div>
-          </div>
-          <div class="filter-row">
-            <div class="filter-title">데이터 정렬</div>
-            <div class="filter-item" :class="{ active: selectedFilter3 === 0 }" @click="selectFilter3(0)">시간</div>
-            <div class="filter-item" :class="{ active: selectedFilter3 === 1 }" @click="selectFilter3(1)">모델 불확실성</div>
-            <div class="filter-item" :class="{ active: selectedFilter3 === 2 }" @click="selectFilter3(2)">데이터 신규성</div>
-          </div>
-          <div class="filter-row">
-            <div class="filter-title">라벨링 유무</div>
-            <div class="filter-item" :class="{ active: selectedFilter4 === 0 }" @click="selectFilter4(0)">YES</div>
-            <div class="filter-item" :class="{ active: selectedFilter4 === 1 }" @click="selectFilter4(1)">NO</div>
-          </div>
-        </div>
-        <div style="width:40%; height:100%; display:flex; flex-direction: column; justify-content: flex-start; margin-top: 4px; margin-right: 1em;">
-          <div class="filter-row" style="justify-content: flex-end;">
-            <div class="filter-item" style="border-radius: 0.25rem; background-color: #F8F8FA; cursor: default;">{{ this.filter.start_date }} ~ {{ this.filter.end_date }}</div>
-            <div class="filter-item" style="border-radius: 0.25rem; background-color: #F8F8FA; cursor: default;">
-              {{ num_items.total }}건 중 {{ num_items.label_yes }}건 완료
-              <span v-if="num_items.total !== 0">( {{ num_items.ratio_label }} %)</span>
-              <span v-else>( 0 %)</span>
+          <div style="width:40%; height:100%; display:flex; flex-direction: column; justify-content: flex-start; margin-top: 4px; margin-right: 1em;">
+            <div class="filter-row" style="justify-content: flex-end;">
+              <div class="filter-item" style="border-radius: 0.25rem; background-color: #F8F8FA; cursor: default;">{{ this.filter.start_date }} ~ {{ this.filter.end_date }}</div>
+              <div class="filter-item" style="border-radius: 0.25rem; background-color: #F8F8FA; cursor: default;">
+                {{ num_items.total }}건 중 {{ num_items.label_yes }}건 완료
+                <span v-if="num_items.total !== 0">( {{ num_items.ratio_label }} %)</span>
+                <span v-else>( 0 %)</span>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <div class="border-card" id="annotator-container" style="width:98%; height:80%; background-color: white;">
+        <div class="border-card" id="annotator-container" style="width:98%; height:80%; background-color: white;">
 
-        <aside v-show="panels.show.left" class="left-panel">
-          <hr />
+          <aside v-show="panels.show.left" class="left-panel">
+            <hr />
 
-          <!-- <div v-if="categories.length > 5">
-            <div style="padding: 0px 5px">
-              <input
-                v-model="search"
-                class="search"
-                placeholder="Category Search"
-              />
-            </div>
-          </div> -->
-
-          <div
-            class="sidebar-section"
-            :style="{ 'max-height': mode == 'label' ? '100%' : '57%' }"
-          >
-            <p
-              v-if="categories.length == 0"
-              style="color: lightgray; font-size: 12px"
-            >
-              No categories have been enabled for this image.
-            </p>
+            <!-- <div v-if="categories.length > 5">
+              <div style="padding: 0px 5px">
+                <input
+                  v-model="search"
+                  class="search"
+                  placeholder="Category Search"
+                />
+              </div>
+            </div> -->
 
             <div
-              v-show="mode == 'segment'"
-              style="overflow: auto; max-height: 100%"
+              class="sidebar-section"
+              :style="{ 'max-height': mode == 'label' ? '100%' : '57%' }"
             >
-              <CategoryPanel
-                v-for="(category, index) in categories"
-                :key="category.id + '-category'"
-                :test = "category.id + '-category'"
-                :simplify="simplify"
-                :categorysearch="search"
-                :category="category"
-                :all-categories="categories"
-                :opacity="shapeOpacity"
-                :hover="hover"
-                :index="index"
-                @clickcategory="onCategoryClick"
-                @keypoints-complete="onKeypointsComplete"
-                :current="current"
-                :active-tool="activeTool"
-                :scale="image.scale"
-                ref="category"
-                @createAnnotation_push="createAnnotation_push"
-                @onUpdateClick_keypoint_labels="onUpdateClick_keypoint_labels"
-                @onUpdateClick_keypoint_edges="onUpdateClick_keypoint_edges"
-                @onUpdateClick_keypoint_colors="onUpdateClick_keypoint_colors"
-                @onUpdateClick_supercategory="onUpdateClick_supercategory"
-                @annotation_push="annotation_push"
-                @CategoryPanel_unite="CategoryPanel_unite"
-                @CategoryPanel_emitModify="CategoryPanel_emitModify"
-              />
+              <p
+                v-if="categories.length == 0"
+                style="color: lightgray; font-size: 12px"
+              >
+                No categories have been enabled for this image.
+              </p>
+
+              <div
+                v-show="mode == 'segment'"
+                style="overflow: auto; max-height: 100%"
+              >
+                <CategoryPanel
+                  v-for="(category, index) in categories"
+                  :key="category.id + '-category'"
+                  :test = "category.id + '-category'"
+                  :simplify="simplify"
+                  :categorysearch="search"
+                  :category="category"
+                  :all-categories="categories"
+                  :opacity="shapeOpacity"
+                  :hover="hover"
+                  :index="index"
+                  @clickcategory="onCategoryClick"
+                  @keypoints-complete="onKeypointsComplete"
+                  :current="current"
+                  :active-tool="activeTool"
+                  :scale="image.scale"
+                  ref="category"
+                  @createAnnotation_push="createAnnotation_push"
+                  @onUpdateClick_keypoint_labels="onUpdateClick_keypoint_labels"
+                  @onUpdateClick_keypoint_edges="onUpdateClick_keypoint_edges"
+                  @onUpdateClick_keypoint_colors="onUpdateClick_keypoint_colors"
+                  @onUpdateClick_supercategory="onUpdateClick_supercategory"
+                  @annotation_push="annotation_push"
+                  @CategoryPanel_unite="CategoryPanel_unite"
+                  @CategoryPanel_emitModify="CategoryPanel_emitModify"
+                />
+              </div>
+
+              <div v-show="mode == 'label'" style="overflow: auto; max-height: 100%">
+                <!-- <CLabel
+                  v-for="category in categories"
+                  v-model="image.categoryIds"
+                  :key="category.id + '-label'"
+                  :category="category"
+                  :search="search"
+                /> -->
+              </div>
             </div>
 
-            <div v-show="mode == 'label'" style="overflow: auto; max-height: 100%">
-              <!-- <CLabel
-                v-for="category in categories"
-                v-model="image.categoryIds"
-                :key="category.id + '-label'"
-                :category="category"
-                :search="search"
-              /> -->
+            <div v-show="mode == 'segment'">
+              <hr />
+              <h6 class="sidebar-title text-center">{{ activeTool }}</h6>
+
+              <div class="tool-section" style="max-height: 30%; color: lightgray">
+
+                <div v-if="$refs.select != null">
+                  <SelectPanel :select="$refs.select" />
+                </div>
+
+                <div v-if="$refs.brush != null">
+                  <BrushPanel :brush="$refs.brush" />
+                </div>
+
+                <div v-if="$refs.eraser != null">
+                  <EraserPanel :eraser="$refs.eraser" />
+                </div>
+
+              </div>
+            </div>
+          </aside>
+
+          <aside v-show="panels.show.right" class="right-panel">
+
+            <!-- <BrushSizePanel :style="{ display: activeTool=='Brush' ? 'block' :'none' }"/> -->
+
+            <!-- <BrushSizePanel v-if="activeTool=='Brush'" @update="update_brush_radius" style="display:flex; justify-content: center; width: 84px; top:0;"/> -->
+
+            <BrushPanel :brush="$refs.brush" v-if="activeTool=='Brush'" @update="update_brush_radius" style="display:flex; justify-content: center; width: 84px; top:0;"/>
+            <EraserPanel :eraser="$refs.eraser" v-else-if="activeTool=='Eraser'" @update="update_eraser_radius" style="display:flex; justify-content: center; width: 84px; top:0;"/>
+            <div v-else style="height:200px;"></div>
+
+
+            <div style="height:40px;"></div>
+
+            <SelectTool
+              :selected="activeTool"
+              @update="activeTool = $event"
+              :scale="image.scale"
+              @setcursor="setCursor"
+              ref="select"
+            />
+
+            <div style="height:40px;"></div>
+
+            <BrushTool
+              :selected="activeTool"
+              @update="activeTool = $event"
+              :scale="image.scale"
+              @setcursor="setCursor"
+              ref="brush"
+            />
+
+            <div style="height:40px;"></div>
+
+            <EraserTool
+              :selected="activeTool"
+              @update="activeTool = $event"
+              :scale="image.scale"
+              @setcursor="setCursor"
+              ref="eraser"
+            />
+
+            <div style="height:40px;"></div>
+
+            <SaveButton />
+            <div style="height:80px;"></div>
+
+
+          </aside>
+
+          <div class="middle-panel" :style="{ cursor: cursor }">
+            <div id="frame" class="frame" @wheel="onwheel" >
+              <canvas class="canvas" id="editor" ref="image" resize />
             </div>
           </div>
 
-          <div v-show="mode == 'segment'">
-            <hr />
-            <h6 class="sidebar-title text-center">{{ activeTool }}</h6>
-
-            <div class="tool-section" style="max-height: 30%; color: lightgray">
-
-              <div v-if="$refs.select != null">
-                <SelectPanel :select="$refs.select" />
-              </div>
-
-              <div v-if="$refs.brush != null">
-                <BrushPanel :brush="$refs.brush" />
-              </div>
-
-              <div v-if="$refs.eraser != null">
-                <EraserPanel :eraser="$refs.eraser" />
-              </div>
-
-            </div>
-          </div>
-        </aside>
-
-        <aside v-show="panels.show.right" class="right-panel">
-
-          <!-- <BrushSizePanel :style="{ display: activeTool=='Brush' ? 'block' :'none' }"/> -->
-
-          <!-- <BrushSizePanel v-if="activeTool=='Brush'" @update="update_brush_radius" style="display:flex; justify-content: center; width: 84px; top:0;"/> -->
-
-          <BrushPanel :brush="$refs.brush" v-if="activeTool=='Brush'" @update="update_brush_radius" style="display:flex; justify-content: center; width: 84px; top:0;"/>
-          <EraserPanel :eraser="$refs.eraser" v-else-if="activeTool=='Eraser'" @update="update_eraser_radius" style="display:flex; justify-content: center; width: 84px; top:0;"/>
-          <div v-else style="height:200px;"></div>
 
 
-          <div style="height:40px;"></div>
 
-          <SelectTool
-            :selected="activeTool"
-            @update="activeTool = $event"
-            :scale="image.scale"
-            @setcursor="setCursor"
-            ref="select"
-          />
-
-          <div style="height:40px;"></div>
-
-          <BrushTool
-            :selected="activeTool"
-            @update="activeTool = $event"
-            :scale="image.scale"
-            @setcursor="setCursor"
-            ref="brush"
-          />
-
-          <div style="height:40px;"></div>
-
-          <EraserTool
-            :selected="activeTool"
-            @update="activeTool = $event"
-            :scale="image.scale"
-            @setcursor="setCursor"
-            ref="eraser"
-          />
-
-          <div style="height:40px;"></div>
-
-          <SaveButton />
-          <div style="height:80px;"></div>
-
-
-        </aside>
-
-        <div class="middle-panel" :style="{ cursor: cursor }">
-          <div id="frame" class="frame" @wheel="onwheel" >
-            <canvas class="canvas" id="editor" ref="image" resize />
-          </div>
         </div>
 
-
-
-
       </div>
 
-    </div>
-
-    <!-- <div class="border-card" id="thumbnail-container"
-    v-for="(myImage) in this.datalist.slice(0,4)" :key="myImage"
-    style="display:flex; flex-direction:column; align-items: center; justify-content: space-around; width:18%; height: 98%; background-color: white;"> -->
-    <div class="border-card" id="thumbnail-container"
-    style="display:flex; flex-direction:column; align-items: center; justify-content: flex-start; width:18%; height: 99%; background-color: white;">
-      <!-- <div style="height: 30px; width:100%; display:flex; flex-direction: row; justify-content: center; align-items: center; margin: 1.5em auto 0.5em auto">
-        <vue-awesome-paginate
-            :total-items="this.index_image.num_items"
-            :items-per-page="4"
-            :max-pages-shown="1"
-            v-model="this.index_image.currentPage"
-            @click="click_page"
-        />
-     </div> -->
-     <v-pagination
-      v-model="this.index_image.currentPage"
-      :pages="this.index_image.num_pages"
-      :range-size="1"
-      active-color="#DCEDFF"
-      @update:modelValue="updatePaginationHandler"
-      style="margin: 1.0em auto;"
-    />
+      <!-- <div class="border-card" id="thumbnail-container"
+      v-for="(myImage) in this.datalist.slice(0,4)" :key="myImage"
+      style="display:flex; flex-direction:column; align-items: center; justify-content: space-around; width:18%; height: 98%; background-color: white;"> -->
+      <div class="border-card" id="thumbnail-container"
+      style="display:flex; flex-direction:column; align-items: center; justify-content: flex-start; width:17.5%; height: 99%; background-color: white;">
+        <!-- <div style="height: 30px; width:100%; display:flex; flex-direction: row; justify-content: center; align-items: center; margin: 1.5em auto 0.5em auto">
+          <vue-awesome-paginate
+              :total-items="this.index_image.num_items"
+              :items-per-page="4"
+              :max-pages-shown="1"
+              v-model="this.index_image.currentPage"
+              @click="click_page"
+          />
+      </div> -->
+      <v-pagination
+        v-model="this.index_image.currentPage"
+        :pages="this.index_image.num_pages"
+        :range-size="1"
+        active-color="#DCEDFF"
+        @update:modelValue="updatePaginationHandler"
+        style="margin: 0.5em auto;"
+      />
 
 
-      <!-- <i
-        v-show=true
-        id="arrow-previous"
-        class="fa-solid fa-chevron-up"
-        style="font-size: 30px; transform: scaleX(6); color: #6CC2FF;"
-        :style = "{ 'opacity' : index_image.start !==0 ? 100 : 0 }"
-        @click="index_image.start !== 0 ? route_previous() : null"
-      /> -->
+        <!-- <i
+          v-show=true
+          id="arrow-previous"
+          class="fa-solid fa-chevron-up"
+          style="font-size: 30px; transform: scaleX(6); color: #6CC2FF;"
+          :style = "{ 'opacity' : index_image.start !==0 ? 100 : 0 }"
+          @click="index_image.start !== 0 ? route_previous() : null"
+        /> -->
 
-      <div v-for="(myImage, index) in datalist.slice(index_image.start,index_image.end)" :key="myImage">
-        <AnnotatorThumbnailCard @click="click_ThumbnailCard($event, myImage, index)" :image_ThumbnailCard="myImage"
-        style="border-color: #BD7C4A ; margin: 0.4em auto;"
-        :style="{ 'border-style': selected_data.thumbnail === myImage ? 'solid' : 'none' }"
-        ></AnnotatorThumbnailCard>
+        <div v-for="(myImage, index) in datalist.slice(index_image.start,index_image.end)" :key="myImage">
+          <AnnotatorThumbnailCard @click="click_ThumbnailCard($event, myImage, index)" :image_ThumbnailCard="myImage"
+          style="border-color: #BD7C4A ; margin: 0.0em auto 0.4em auto;"
+          :style="{ 'border-style': selected_data.thumbnail === myImage ? 'solid' : 'none' }"
+          ></AnnotatorThumbnailCard>
+        </div>
+
+        <!-- <i
+          v-show=true
+          id="arrow-next"
+          class="fa-solid fa-chevron-down"
+          style="font-size: 30px; transform: scaleX(6); color: #6CC2FF;"
+          :style = "{ 'opacity' : index_image.end !== index_image.num_items ? 100 : 0 }"
+          @click="index_image.end !== index_image.num_items ? route_next() : null"
+        /> -->
       </div>
 
-      <!-- <i
-        v-show=true
-        id="arrow-next"
-        class="fa-solid fa-chevron-down"
-        style="font-size: 30px; transform: scaleX(6); color: #6CC2FF;"
-        :style = "{ 'opacity' : index_image.end !== index_image.num_items ? 100 : 0 }"
-        @click="index_image.end !== index_image.num_items ? route_next() : null"
-      /> -->
     </div>
 
   </div>
+
+
+
 
 
 
@@ -477,7 +484,7 @@
         start_date.setDate(end_date.getDate() - 7)
         this.filter.end_date = this.DateToString(end_date)
         this.filter.start_date = this.DateToString(start_date)
-        this.filter.predict_result = "ng"
+        this.filter.predict_result = "ok"
         this.filter.order_by = "create_time"
         this.filter.is_label = false
 
@@ -517,13 +524,23 @@
         this.load_data()
       },
       selectFilter2(index) {
-        this.selectedFilter2 = index
-
-        if(index == 0) {
-          this.filter.predict_result = "ok"
+        // 0: null, 1: ok, 2: ng
+        if(this.selectedFilter2 == index) {
+          this.selectedFilter2 = 0
         }
         else {
+          this.selectedFilter2 = index
+        }
+
+
+        if(this.selectedFilter2 == 1) {
+          this.filter.predict_result = "ok"
+        }
+        else if(this.selectedFilter2 == 2) {
           this.filter.predict_result = "ng"
+        }
+        else {
+          this.filter.predict_result = ""
         }
 
         this.load_data()
@@ -577,7 +594,8 @@
               // project_id: 1,
               start_date: this.filter.start_date,
               end_date: this.filter.end_date,
-              predict_result: this.filter.predict_result,
+              ...(this.filter.predict_result !== "" && { predict_result: this.filter.predict_result }),
+              // predict_result: this.filter.predict_result,
               is_label: !this.filter.is_label,
               order_by: this.filter.order_by,
               page: 1,
@@ -601,7 +619,8 @@
                 // project_id: 1,
                 start_date: this.filter.start_date,
                 end_date: this.filter.end_date,
-                predict_result: this.filter.predict_result,
+                ...(this.filter.predict_result !== "" && { predict_result: this.filter.predict_result }),
+                // predict_result: this.filter.predict_result,
                 is_label: this.filter.is_label,
                 order_by: this.filter.order_by,
                 page: 1,
@@ -636,6 +655,7 @@
               // 배포
               this.datalist[index].image_file_path =  items.image_file_path.split('/').slice(3).join('/')
               this.datalist[index].image_filename =  items.image_file_path.split('/').slice(2).join('/')
+
               // console.log("FileName 확인하자!!! : " + items.image_file_path.split('/').slice(3).join('/'))
               // /iQ.Platform/projects/1/data/2023-05-22/16-03-53/49_origin.jpg -> slice(4) /1/data/2023-05-22/16-03-53/49_origin.jpg 이렇게 요청됨
 
@@ -1859,6 +1879,9 @@
 .filter-item.active {
   background-color: #1B7CFE;
   color: white;
+}
+.filter-item.disable {
+  pointer-events: none;
 }
 
 .alert {

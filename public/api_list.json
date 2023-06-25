@@ -1,4 +1,6 @@
 {
     "annotator_save": "http://183.105.120.175:30006/annotation/",
-    "annotator_load": "http://183.105.120.175:30006/annotation"
+    "annotator_load": "http://183.105.120.175:30006/annotation",
+    "stream_evaluate_image": "http://183.105.120.175:30007/eval/stream/triton/tensorrt/",
+    "eval_web_socket": "ws://183.105.120.175:30007/eval/web_socket"
 }

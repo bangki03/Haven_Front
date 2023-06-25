@@ -48,7 +48,7 @@ const routes = [
         component: ModelTestView,
       },
       {
-        path: "auth/",
+        path: "members/",
         name: "AuthView",
         component: AuthView,
       },

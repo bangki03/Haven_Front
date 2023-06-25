@@ -1,56 +1,65 @@
 <template>
-   <div class="modal-wrapper" @click="close_modal()">
-      <div class="modal" @click.stop="do_nothing()">
-         <div class="modal-header">프로젝트 생성</div>
+   <div class="mymodal-wrapper" @click="close_modal()">
+      <div class="mymodal" @click.stop="do_nothing()">
+         <div class="modal-contents">
+            <div class="mymodal-header">프로젝트 생성</div>
 
-         <div class="modal-main">
-            <div class="item-key">프로젝트 이름</div>
-            <div class="item-value">
-               <input v-model="project_info.project_name" class="form-control" placeholder="제품+검사+공정" required>
-            </div>
+            <div class="mymodal-main">
+               <div class="item-key">프로젝트 이름</div>
+               <div class="item-value">
+                  <!-- <input v-model="project_info.project_name" class="form-control" placeholder="제품+검사+공정" required> -->
+                  <input id="input_project_name" :value="project_info.project_name" @input="project_info.project_name = $event.target.value" @blur="saveInputValue" class="form-control" placeholder="제품+검사+공정" required>
+               </div>
 
-            <div class="item-key">공장</div>
-            <div class="item-value">
-               <input v-model="project_info.factory_name" class="form-control" placeholder="공장명" required>
-            </div>
+               <div class="item-key">공장</div>
+               <div class="item-value">
+                  <!-- <input v-model="project_info.factory_name" class="form-control" placeholder="공장명" required> -->
+                  <input id="input_factory_name" :value="project_info.factory_name" @input="project_info.factory_name = $event.target.value" @blur="saveInputValue" class="form-control" placeholder="공장명" required>
+               </div>
 
-            <div class="item-key">제품</div>
-            <div class="item-value">
-               <input v-model="project_info.product_name" class="form-control" placeholder="제품명" required>
-            </div>
+               <div class="item-key">제품</div>
+               <div class="item-value">
+                  <!-- <input v-model="project_info.product_name" class="form-control" placeholder="제품명" required> -->
+                  <input id="input_product_name" :value="project_info.product_name" @input="project_info.product_name = $event.target.value" @blur="saveInputValue" class="form-control" placeholder="제품명" required>
+               </div>
 
-            <div class="item-key">검사</div>
-            <div class="item-value">
-               <input v-model="project_info.process_name" class="form-control" placeholder="검사명" required>
-            </div>
+               <div class="item-key">검사</div>
+               <div class="item-value">
+                  <!-- <input v-model="project_info.process_name" class="form-control" placeholder="검사명" required> -->
+                  <input id="input_process_name" :value="project_info.process_name" @input="project_info.process_name = $event.target.value" @blur="saveInputValue" class="form-control" placeholder="검사명" required>
+               </div>
 
-            <div class="item-key">공정</div>
-            <div class="item-value">
-               <input v-model="project_info.operation_name" class="form-control" placeholder="공정명" required>
-            </div>
+               <div class="item-key">공정</div>
+               <div class="item-value">
+                  <!-- <input v-model="project_info.operation_name" class="form-control" placeholder="공정명" required> -->
+                  <input id="input_operation_name" :value="project_info.operation_name" @input="project_info.operation_name = $event.target.value" @blur="saveInputValue" class="form-control" placeholder="공정명" required>
+               </div>
 
-            <div class="item-key">프로젝트 타입</div>
-            <div class="item-value" style="">
-               <div class="dropdown" ref="dropdownRef">
-                  <button class="dropbtn" @click="handleDropBtn" :style="{ 'color' : selectedProjectTextColor }">{{ selectedProjectType }}</button>
-                  <div class="dropdown-content" :style="{ display: showDropdownContent ? 'block' : 'none' }">
-                     <a @click="selectProjectType('Classification')">Classification</a>
-                     <a @click="selectProjectType('Detection')">Detection</a>
-                     <a @click="selectProjectType('Segmentation')">Segmentation</a>
+               <div class="item-key">프로젝트 타입</div>
+               <div class="item-value" style="">
+                  <div class="dropdown" ref="dropdownRef">
+                     <button class="dropbtn" @click="handleDropBtn" :style="{ 'color' : selectedProjectTextColor }">{{ selectedProjectType }}</button>
+                     <div class="dropdown-content" :style="{ display: showDropdownContent ? 'block' : 'none' }">
+                        <a @click="selectProjectType('Classification')">Classification</a>
+                        <a @click="selectProjectType('Detection')">Detection</a>
+                        <a @click="selectProjectType('Segmentation')">Segmentation</a>
+                     </div>
                   </div>
+               </div>
+
+               <div class="item-key">설명</div>
+               <div class="item-value" style="grid-row: 8 / span 2; grid-column: 1 / span 2; display:flex; align-items: stretch; justify-items: stretch;">
+                  <textarea v-model="project_info.project_script" style="width: 100%; height:8em; line-height:1.5em; border-radius: 20px; padding: 0.2em 1em;"></textarea>
+                  <!-- <input v-model="project_info.project_script" type="text" style="width: 100%; height:4em; line-height:4em; border-radius: 20px;"> -->
                </div>
             </div>
 
-            <div class="item-key">설명</div>
-            <div class="item-value" style="grid-row: 8 / span 2; grid-column: 1 / span 2; display:flex; align-items: stretch; justify-items: stretch;">
-               <textarea v-model="project_info.project_script" style="width: 100%; height:8em; line-height:1.5em; border-radius: 20px; padding: 0.2em 1em;"></textarea>
-               <!-- <input v-model="project_info.project_script" type="text" style="width: 100%; height:4em; line-height:4em; border-radius: 20px;"> -->
+            <div class="mymodal-footer">
+               <input type="submit" class="btn" value="생성하기" style="background-color: #BD7C4A; color:white; font-size: 2em; padding:0.1em 1em;" @click="handle_toggle">
             </div>
+
          </div>
 
-         <div class="modal-footer">
-            <input type="submit" class="btn" value="생성하기" style="background-color: #BD7C4A; color:white; font-size: 2em; padding:0.1em 1em;" @click="handle_toggle">
-         </div>
     </div>
 
    </div>
@@ -89,6 +98,23 @@ export default{
    },
 
    methods: {
+      saveInputValue(event){
+         if(event.target.id == "input_project_name") {
+            this.project_info.project_name = event.target.value
+         }
+         else if(event.target.id == "input_factory_name") {
+            this.project_info.factory_name = event.target.value
+         }
+         else if(event.target.id == "input_product_name") {
+            this.project_info.product_name = event.target.value
+         }
+         else if(event.target.id == "input_process_name") {
+            this.project_info.process_name = event.target.value
+         }
+         else if(event.target.id == "input_operation_name") {
+            this.project_info.operation_name = event.target.value
+         }
+      },
       handle_toggle() {
          this.post_register_account()
 
@@ -98,6 +124,8 @@ export default{
          this.selectedProjectType = type;
          this.showDropdownContent = false;
          this.selectedProjectTextColor = 'black'
+
+         this.project_info.project_type = this.selectedProjectType
       },
 
       handleDropBtn() {
@@ -107,7 +135,6 @@ export default{
          event.stopPropagation(); // 클릭 이벤트 전파 중지
       },
       handleOutsideClick(event) {
-         console.log("모모모모모모")
          if (this.showDropdownContent && !this.$refs.dropdownRef.contains(event.target)) {
             this.showDropdownContent = false;
          }
@@ -222,7 +249,7 @@ export default{
 .dropdown:hover .dropdown-content {display: block;}
 
 /* .dropdown:hover .dropbtn {background-color: #3e8e41;} */
-.modal-wrapper {
+.mymodal-wrapper {
    position: fixed;
    width: 100vw;
    height: 100vh;
@@ -231,7 +258,7 @@ export default{
    /* background-color: rgba(250,252,254,0.7); */
    background-color: rgba(0, 0, 0, 0.5); /* 불투명한 배경 스타일 */
 }
-.modal {
+.mymodal {
    display: block;
    width: 40vw;
    height: 78vh;
@@ -244,13 +271,20 @@ export default{
    background-color: rgba(250,252,254,1);
    box-shadow: 0px 0px 1px 1px #dddddd;
 }
-.modal-header{
+.mymodal-header{
+   margin-top: 0.5em;
+   padding-bottom: 0.5em;
+
    display: flex;
    justify-content: center;
    font-size: 1.8em;
+   border: 0px solid;
    border-bottom-width: 2px;
+
+   border-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0));
+   border-image-slice: 1;
 }
-.modal-main {
+.mymodal-main {
    padding: 1em 5em;
    display: grid;
    grid-template-columns: 2fr 5fr;
@@ -287,10 +321,20 @@ h1 {
   margin-bottom: 1.5rem;
 }
 
-.modal-footer {
+.mymodal-footer {
    display: flex;
    justify-content: center;
    align-items: center;
+
+   margin-bottom: 1.0em;
+   padding-top: 1.0em;
+
+   /* font-size: 1.8em; */
+   border: 0px solid;
+   border-top-width: 2px;
+
+   border-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0));
+   border-image-slice: 1;
 }
 
 .error {

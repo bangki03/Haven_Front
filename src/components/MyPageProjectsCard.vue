@@ -9,7 +9,7 @@
                     alt="../assets/Project_Preview_Icon.png"
                     style="height: 25px; width: 25px; padding: 0; margin-right:auto;"
                     />
-                    <div style="margin: 0;"> {{ project_SummaryCard.project_type }}</div>
+                    <div style="margin: 0; color:white"> {{ project_SummaryCard.project_type }}</div>
                 </div>
 
                 <div>
@@ -77,7 +77,29 @@
 <script>
 
 export default{
-    props: ['project_SummaryCard']
+    props: ['project_SummaryCard'],
+    methods: {
+        ClickButtonDelete() {
+            fetch("http://183.105.120.175:30004/project/" + this.project_SummaryCard.project_id, {
+                method: "DELETE",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                // body: JSON.stringify({
+                //     ai_model_id: this.modelInfo.id,
+                // }),
+                }).then( data => {
+                    console.log(data)
+                if(data.status == '200'){
+                    alert("프로젝트 삭제 되었습니다.");
+                }
+            })
+            .then(() => {
+                this.$router.go();
+            })
+            ;
+        },
+    }
 }
 </script>
 
