@@ -110,7 +110,7 @@
                 </div>
             </a>
 
-            <a href="#" class="d-flex align-items-center text-decoration-none" style="justify-content: flex-start;">
+            <a href="#" class="d-flex align-items-center text-decoration-none" style="justify-content: flex-start;" @click="Logout">
                 <div style="display:inline-flex; flex-direction: row; align-items: center; margin: 0.5em 0.5em 0.5em 1.0em; padding: 0; color: white;">
                     <!-- <img
                         id="Logo"
@@ -142,7 +142,7 @@
             <RouterView>  </RouterView>
         </div> -->
 
-        <RouterView>  </RouterView>
+        <RouterView @emit_selectedMenu="emit_selectedMenu">  </RouterView>
 
     </div>
 </template>
@@ -162,6 +162,9 @@ export default{
         }
     },
     methods: {
+        emit_selectedMenu(index) {
+            this.selectedMenu = index
+        },
         routespage() {
             if (!this.$store.state.account.LoginActive) {
                 alert("Please, Login First!!!!")

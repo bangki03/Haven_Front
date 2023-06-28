@@ -50,7 +50,7 @@
                 <p style="font-family: NotoSansKR-Regular; font-weight: bold; font-size:1.5rem; align-self: flex-start; margin-left: 1.0rem; margin-top:0rem; margin-bottom: 0rem;"> 모델을 적용하기 전 원하는 데이터와 비교하고 싶은 두가지 모델을 선택하여 성능을 비교해보세요! </p>
                 <div style="width:98%; height:calc(100% - 4rem); display:flex; flex-direction: row; justify-content: space-around; margin-top:2em;">
                     <div style="width:35%; aspect-ratio: 1/1; display:flex; flex-direction: column; justify-content: flex-start; align-items: center; padding-top:1.0em; padding-bottom:0.5em;">
-                        <input type="file" id="imageInput" multiple style="display: none;" @change="handleFileInputChange">
+                        <input type="file" id="imageInput" multiple style="display: none;" @change="handleFileInputChange" accept="image/*" value="">
                         <div v-if="ImageList.length == 0" class="empty-frame" @click="click_loadImage">
                             <p style="font-size: 3.0em; color: #898989; width:70%;">1. 검증할 영상을 선택하세요</p>
                             <i style="font-size: 9em; color: #898989" class="fa-solid fa-plus fa-sharp"></i>
@@ -58,9 +58,9 @@
                         </div>
                         <div v-else class="selected-frame" @click="click_loadImage">
                             <p style="font-size: 3.0em; width:75%;">영상 선택 완료</p>
-                            <div style="height:50%; width:100%; display:flex; flex-direction: column; align-items: center;">
+                            <!-- <div style="height:50%; width:100%; display:flex; flex-direction: column; align-items: center;">
                                 <p v-for="imageInfo in this.ImageList" :key="imageInfo" style="font-size: 1.0em; width:75%;">{{ imageInfo }}</p>
-                            </div>
+                            </div> -->
                         </div>
                     </div>
 
@@ -69,11 +69,11 @@
                             <p style="font-size: 3.0em; color: #898989; width:70%;">2. 검증할 모델을 선택하세요</p>
                             <i style="font-size: 9em; color: #898989" class="fa-solid fa-plus fa-sharp"></i>
                         </div>
-                        <div v-else class="selected-frame">
+                        <div v-else class="selected-frame" @click="OpenSetModelModal">
                             <p style="font-size: 3.0em; width:75%;">모델 선택 완료</p>
-                            <div style="height:50%; width:100%; display:flex; flex-direction: column; align-items: center;">
-                                <p v-for="modelInfo in this.ModelList" :key="modelInfo" style="font-size: 1.0em; width:75%;">{{ modelInfo }}</p>
-                            </div>
+                            <!-- <div style="height:50%; width:100%; display:flex; flex-direction: column; align-items: center;">
+                                <p v-for="modelInfo in this.ModelList" :key="modelInfo" style="font-size: 1.0em; width:75%;"></p>
+                            </div> -->
 
                         </div>
                     </div>
@@ -284,14 +284,13 @@ export default{
         handleFileInputChange(event) {
             const files = event.target.files;
             if (files.length === 0) {
-                // 파일 선택이 취소되었을 때 처리할 로직을 작성합니다.
                 console.log('파일 선택이 취소되었습니다.');
                 return;
             }
 
             this.ImageList = []
             for (var file of files){
-
+                console.log(file.value)
                 this.ImageList.push({
                     filename: file.name,
                     imagepath: this.set_origin_filepath(file.name),
@@ -438,16 +437,27 @@ export default{
                 for(let i=0; i<this.ImageList.length; i++) {
                     image_files_Array.push(this.ImageList[i].imagepath)
                 }
-                let models_Array = []
+
+                let models_Array_ids = []
+                let models_Array_names = []
+                let models_Array_paths = []
+
+                console.log(this.ModelList)
+
                 for(let i=0; i<this.ModelList.length; i++) {
-                    models_Array.push(String(this.ModelList[i].id))
+                    models_Array_ids.push(String(this.ModelList[i].id))
+                    models_Array_names.push(String(this.ModelList[i].name))
+                    models_Array_paths.push(String(this.ModelList[i].file_path))
                 }
 
                 var jsonData = {
                     'project_id': this.$store.state.project.id,
                     'image_files': image_files_Array,
-                    'ai_model_ids': models_Array
+                    'ai_model_ids': models_Array_ids,
+                    'ai_model_names': models_Array_names,
+                    'ai_model_paths': models_Array_paths,
                 }
+                console.log(jsonData)
 
                 // Test
                 // var jsonData = {
@@ -472,6 +482,7 @@ export default{
             };
 
             this.socket.onmessage = (event) => {
+                console.log(event)
                 var validJSONstring = event.data.replace(/'/g, '"');
                 const data = JSON.parse(validJSONstring); // 받은 데이터를 JSON 형태로 파싱합니다.
                 this.Parse_InferenceData(data)
@@ -677,12 +688,16 @@ export default{
             // filename='2023-06-16_16-19-41_01image.jpg'
             let filename_list = filename.split('_')
             // console.log(filename_list)
-            let filepath = "/iQ.Platform/projects/" + this.$store.state.project.id + "/data/" + filename_list[0] + "/" + filename_list[1] + "/"+ filename
+            // let filepath = "/iQ.Platform/projects/" + this.$store.state.project.id + "/data/" + filename_list[0] + "/" + filename_list[1] + "/"+ filename
+            let filepath = "/iQ.Platform/projects/" + this.$store.state.project.id + "/data/" + filename_list[0] + "/"+ filename
+            // console.log(filepath)
             return filepath
         },
 
         // 파일명 표시 위한 filepath
         get_filepath_to_show_filename(input){
+            // console.log("get_filepath_to_show_filename")
+            // console.log(input.split('/').slice(5).join('/'))
             return input.split('/').slice(5).join('/')
         },
 
@@ -690,7 +705,8 @@ export default{
         // input : "/iQ.Platform/projects/1/data/2023-06-16/16-19-41/2023-06-16_16-19-41_01image.jpg"
         // output : "../project/1/data/2023-06-16/16-19-41/2023-06-16_16-19-41_01image.jpg"
         get_filepath_to_load_image(input){
-
+            // console.log("get_filepath_to_load_image")
+            // console.log("../project/" + input.split('/').slice(3).join('/'))
             return "../project/" + input.split('/').slice(3).join('/')
         },
 
@@ -718,6 +734,11 @@ export default{
     },
     created(){
         this.set_config()
+        this.$emit("emit_selectedMenu", 2)
+
+        if (Object.prototype.hasOwnProperty.call(this.$route.query, "id")) {
+          this.ModelList.push(this.$route.query)
+        }
     },
 
     beforeUnmount() {

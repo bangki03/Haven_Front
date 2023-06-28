@@ -93,6 +93,8 @@ export default{
                     reject(new Error("Failed to load image."));
                 };
                 img.src = this.inferenceInfo.image_path2;
+                // console.log("img.src")
+                // console.log(img.src)
             });
         },
         // 이미지 로드 및 마스크 그리기 함수 (임시 마스크 2개)

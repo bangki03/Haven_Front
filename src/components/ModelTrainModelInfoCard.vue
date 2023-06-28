@@ -22,11 +22,13 @@
         <p style="font-family: Poppins-SemiBold; font-size:1.0rem; margin: auto 1.0em auto 1.0em;">{{ val_score_fixed }}</p>
 
         <!-- Action -->
-        <div v-if="modelInfo.deploy_status === 'DEPLOYED'">"-"</div>
+        <div v-if="modelInfo.deploy_status === 'DEPLOYED'">-</div>
         <div v-else-if="modelInfo.deploy_status === 'AVAILABLE'"><button @click="ClickButtonDeploy" class="image-icon-action"></button></div>
         <div v-else-if="modelInfo.train_status === 'TRAINING'"><i class="fa-solid fa-stop fa-beat-fade" style="font-size: 2rem; cursor:pointer;" @click="ClickButtonStop"></i></div>
-        <div v-else>"-"</div>
-        <div><button @click="ClickButtonTest" class="image-icon-test"></button></div>
+        <div v-else>-</div>
+
+        <div v-if="modelInfo.train_status === 'TRAINING'">-</div>
+        <div v-else><button @click="ClickButtonTest" class="image-icon-test"></button></div>
         <!-- <div><button @click="ClickButtonInfo" class="image-icon-info"></button></div> -->
         <div><button @click="ClickButtonDelete" class="image-icon-delete"></button></div>
     </div>
@@ -57,14 +59,16 @@ export default{
             val_score_fixed: "",
 
             color_status_train: {
-                TRAINING: "#DCC236",    // Yellow
-                FINISHED: "#3430ED",    // Blue
-                ERROR: "#E93434"        // Red
+                // #FF5F2E red
+                FINISHED: "#004E66",    // green
+                TRAINING: "#FCBE32",    // yellow
+                ERROR: "#E1EEF6"        // gray
+
             },
 
             color_status_deploy: {
-                DEPLOYED: "#DCC236",
-                AVAILABLE: "#3430ED",
+                DEPLOYED: "#FF5F2E",    // red
+                AVAILABLE: "#FCBE32",   // yellow
             },
 
         }
@@ -106,6 +110,13 @@ export default{
                 this.$router.go();
             })
             ;
+        },
+        ClickButtonTest() {
+            this.$router.push({
+                name: 'ModelTestView', // 이동할 라우트 이름
+                // params: {'name': "aaa", "id": "bbb"}
+                query: this.modelInfo
+            });
         },
         ClickButtonStop() {
             fetch("http://183.105.120.175:30004/ai-model/stop-train/" + this.modelInfo.id, {

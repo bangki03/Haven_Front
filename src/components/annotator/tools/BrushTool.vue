@@ -1,5 +1,7 @@
 <template>
-  <div><i v-tooltip.right='tooltip' class='fa-solid fa-brush' :style='{ color: iconColor, fontSize: fontSize + "px" }' @click='click'></i><br></div>
+  <!-- <div><i v-tooltip.right='tooltip' class='fa-solid fa-brush' :style='{ color: iconColor, fontSize: fontSize + "px" }' @click='click'></i><br></div> -->
+  <!-- tooltip이 커서 가리나? -->
+  <div><i class='fa-solid fa-brush' :style='{ color: iconColor, fontSize: fontSize + "px" }' @click='click'></i><br></div>
 </template>
 
 <script>
@@ -27,7 +29,7 @@ export default {
         pathOptions: {
           strokeColor: "white",
           strokeWidth: 1,
-          radius: 10
+          radius: 2
         }
       },
       selection: null
@@ -141,8 +143,17 @@ export default {
     },
   },
   computed: {
+    isActive() {
+      console.log("[computed brush] isActive")
+      if (this.selected == this.name) {
+        this.$emit("setcursor", this.cursor);
+        return true;
+      }
+      return false;
+    },
     isDisabled() {
-      return this.$parent.current.annotation == -1;
+      // return false  // 지금 tool 그대로 사용
+      return this.$parent.current.annotation == -1;  // 기본 select로 돌아감
     }
   },
   watch: {
@@ -159,6 +170,7 @@ export default {
       this.brush.path.strokeColor = newColor;
     },
     isActive(active) {
+      console.log("[watch brush] isActive")
       if (this.brush.path != null) {
         this.brush.path.visible = active;
       }

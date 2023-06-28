@@ -46,6 +46,7 @@ const routes = [
         path: "test/",
         name: "ModelTestView",
         component: ModelTestView,
+        // props: true,
       },
       {
         path: "members/",

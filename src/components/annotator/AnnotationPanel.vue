@@ -334,10 +334,6 @@ export default {
   methods: {
     ...mapMutations(["addUndo"]),
     initAnnotation() {
-      console.log("[AnnotationPanel][initAnnotation] - this.annotation")
-      console.log(this.annotation)
-      console.log("[AnnotationPanel][initAnnotation] - this.compoundPath (before)")
-      console.log(this.compoundPath)
       // let metaName = this.annotation.metadata.name;
 
       // if (metaName) {
@@ -350,23 +346,12 @@ export default {
         this.compoundPath = null;
       }
 
-      console.log("[AnnotationPanel][initAnnotation] - this.compoundPath (after)")
-      console.log(this.compoundPath)
-
       this.createCompoundPath(
         this.annotation.paper_object,
         this.annotation.segmentation
       );
     },
     createCompoundPath(json, segments) {
-      console.log("[AnnotationPanel][createCompoundPath] - json")
-      console.log(json)
-      console.log("[AnnotationPanel][createCompoundPath] - segments")
-      console.log(segments)
-      console.log("[AnnotationPanel][createCompoundPath] - width")
-      console.log(this.annotation.width)
-      console.log("[AnnotationPanel][createCompoundPath] - height")
-      console.log(this.annotation.height)
       json = json || null;
       segments = segments || null;
 
@@ -392,8 +377,6 @@ export default {
 
       // Create new compoundpath (original)
       this.compoundPath = new paper.CompoundPath();
-      console.log("[AnnotationPanel][createCompoundPath] - this.compoundPath")
-      console.log(this.compoundPath)
 
       // Create new compoundpath (1st how)
       // this.compoundPath = new paper.CompoundPath();
@@ -420,7 +403,6 @@ export default {
 
 
       this.compoundPath.onDoubleClick = () => {
-        console.log('[AnnotationPanel][compoundpath.onDoubleClick]')
         if (this.activeTool !== "Select") return;
         $(`#annotationSettings${this.annotation.id}`).modal("show");
       };
@@ -446,11 +428,9 @@ export default {
       }
 
       if (json != null) {
-        console.log('[AnnotationPanel][createCompoundPath] - json not null')
         // Import data directroy from paperjs object
         this.compoundPath.importJSON(json);
       } else if (segments != null) {
-        console.log('[AnnotationPanel][createCompoundPath] - segments not null')
         // Load segments input compound path
         let center = new paper.Point(width / 2, height / 2);
 
@@ -699,12 +679,9 @@ export default {
      * @param {isBBox} isBBox mark annotation as bbox.
      */
     unite(compound, simplify = true, undoable = true, isBBox = false) {
-      console.log('[AnnotationPanel][unite]')
-      console.log('[AnnotationPanel][unite] - this.compoundPath (before)')
-      console.log(this.compoundPath)
+
       if (this.compoundPath == null) this.createCompoundPath();
-      console.log('[AnnotationPanel][unite] - this.compoundPath (after)')
-      console.log(this.compoundPath)
+
 
       // if (this.compoundPath == null) {
       //   console.log('[AnnotationPanel][unite] - null')
@@ -719,10 +696,7 @@ export default {
       newCompound.strokeWidth = 0;
       newCompound.onDoubleClick = this.compoundPath.onDoubleClick;
       newCompound.onClick = this.compoundPath.onClick;
-      console.log("[AnnotationPanel][unite] - ############################## compound ############################## ")
-      console.log(compound)
-      console.log("[AnnotationPanel][unite] - ############################## newCompound ############################## ")
-      console.log(newCompound)
+
       // annotation prop으로 받은 데이터니까, 여기서 push 하지말고 emit해서 부모 페이지에서 바꿔주자.
       // this.annotation.isbbox = isBBox;
       this.$emit('AnnotationPanel_unite', isBBox)
@@ -731,8 +705,7 @@ export default {
 
       this.compoundPath.remove();
       this.compoundPath = newCompound;
-      console.log('[AnnotationPanel][unite] - this.compoundPath (after2 newCompound)')
-      console.log(this.compoundPath)
+
       this.keypoints.bringToFront();
 
       if (simplify) this.simplifyPath();
@@ -871,7 +844,6 @@ export default {
   },
   watch: {
     activeTool(tool) {
-      console.log("[watch][AnnotationPanel][activeTool]")
       if (this.isCurrent) {
         this.session.tools.push(tool);
 
@@ -901,23 +873,18 @@ export default {
       }
     },
     opacity(opacity) {
-      console.log("[watch][AnnotationPanel][opacity]")
       this.compoundPath.opacity = opacity;
     },
     color() {
-      console.log("[watch][AnnotationPanel][color]")
       this.setColor();
     },
     isVisible(newVisible) {
-      console.log("[AnnotationPanel][watch][isVisible] - newVisible")
-      console.log(newVisible)
       if (this.compoundPath == null) return;
 
       this.compoundPath.visible = newVisible;
       this.keypoints.visible = newVisible;
     },
     compoundPath() {
-      console.log("[watch][AnnotationPanel][compoundPath]")
       if (this.compoundPath == null) return;
 
       this.compoundPath.visible = this.isVisible;
@@ -925,18 +892,12 @@ export default {
       this.isEmpty = this.compoundPath.isEmpty() && this.keypoints.isEmpty();
     },
     keypoints() {
-      console.log("[watch][AnnotationPanel][keypoints]")
       this.isEmpty = this.compoundPath.isEmpty() && this.keypoints.isEmpty();
     },
     annotation() {
-      console.log("[watch][AnnotationPanel][annotation]")
       this.initAnnotation();
     },
     isCurrent(current, wasCurrent) {
-      console.log("[watch][AnnotationPanel][isCurrent] - (before)")
-      console.log(wasCurrent)
-      console.log("[watch][AnnotationPanel][isCurrent] - (after)")
-      console.log(current)
       if (current) {
         // Start new session
         this.session.start = Date.now();
@@ -954,12 +915,10 @@ export default {
       this.compoundPath.fullySelected = this.isCurrent;
     },
     currentKeypoint(point, old) {
-      console.log("[watch][AnnotationPanel][currentKeypoint]")
       if (old) old.selected = false;
       if (point) point.selected = true;
     },
     "keypoint.tag"(newVal) {
-      console.log("[watch][AnnotationPanel][keypoint.tag]")
       let id = newVal.length === 0 ? -1 : newVal[0];
       if (id !== -1) {
         this.currentKeypoint = this.keypoints._labelled[id];
@@ -967,12 +926,10 @@ export default {
       this.tagRecomputeCounter++;
     },
     "keypoint.visibility"(newVal) {
-      console.log("[watch][AnnotationPanel][keypoint.visibility]")
       if (!this.currentKeypoint) return;
       this.currentKeypoint.visibility = newVal;
     },
     keypointEdges(newEdges) {
-      console.log("[watch][AnnotationPanel][keypointEdges]")
       this.keypoints.color = this.darkHSL;
       newEdges.forEach(e => this.keypoints.addEdge(e));
     },
@@ -1075,14 +1032,9 @@ export default {
     }
   },
   created() {
-    console.log('[created][AnnotationPanel] - index : ' + this.index)
-    console.log('[created][AnnotationPanel] - annotation : ')
-    console.log(this.annotation)
   },
   mounted() {
-    console.log('[mounted][AnnotationPanel] - index : ' + this.index)
-    console.log('[mounted][AnnotationPanel] - annotation : ')
-    console.log(this.annotation)
+
     // this.initAnnotation(); // _currentstyle 때문에 어떻게 사용하는지 모르겠다...
     $(`#keypointSettings${this.annotation.id}`).on("hidden.bs.modal", () => {
       this.currentKeypoint = null;
@@ -1090,9 +1042,6 @@ export default {
 
   },
   unmounted() {
-    console.log('[unmounted][AnnotationPanel] - index : ' + this.index)
-    console.log('[unmounted][AnnotationPanel] - annotation : ')
-    console.log(this.annotation)
   }
 };
 </script>

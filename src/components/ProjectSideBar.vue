@@ -9,7 +9,7 @@
                     id="Logo"
                     src="../assets/Login_Logo.png"
                     alt="../assets/Login_Logo.png"
-                    
+
                     style="height: 58.9px; width: 176px; padding: 0;"
                 />
                 </a>
@@ -99,7 +99,7 @@
             <div class="d-flex flex-row border-bottom" style="height:70px;">
 
                 <p style="display:inline; margin-left: auto; margin-bottom:auto; margin-top:auto;" @click="Logout">광주제3공장blahbla</p>
-                
+
                 <p style="display:inline; margin-left: 15px; margin-bottom:auto; margin-top:auto;" @click="Logout">로그아웃</p>
                 <img
                     id="Logo"
@@ -110,7 +110,7 @@
             </div>
         </div>
     </div>
-    
 
-    
+
+
 </template>

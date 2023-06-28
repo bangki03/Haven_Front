@@ -3,7 +3,6 @@
         <img
             id="Icon_Project_Preview_Application"
             :src= this.image_ThumbnailCard.image_file_path
-            alt="../assets/TestSampleImage.png"
             style=" width: 190px; padding: 0;"
         />
         <div style="font-size:0.8rem;">{{ filename }}</div>

@@ -72,19 +72,19 @@ export default{
         this.prop_account.Password = event.target.value
       }
       else if(event.target.id == "register_id") {
-        this.prop_account.Email = event.target.value
+        this.reg_account.Email = event.target.value
       }
       else if(event.target.id == "register_name") {
-        this.prop_account.Name = event.target.value
+        this.reg_account.Name = event.target.value
       }
       else if(event.target.id == "register_password") {
-        this.prop_account.Password = event.target.value
+        this.reg_account.Password = event.target.value
       }
       else if(event.target.id == "register_passwordconfirm") {
-        this.prop_account.Password_confirm = event.target.value
+        this.reg_account.Password_confirm = event.target.value
       }
       else if(event.target.id == "register_phonenNo") {
-        this.prop_account.PhoneNumber = event.target.value
+        this.reg_account.PhoneNumber = event.target.value
       }
 
     },
@@ -100,6 +100,12 @@ export default{
     doRegister() {
         if (this.reg_account.Email === "" || this.reg_account.Name === "" || this.reg_account.Password === "" || this.reg_account.Password_confirm === "" || this.reg_account.PhoneNumber === "") {
           this.emptyFields = true;
+          console.log("this.reg_account.Email: ",this.reg_account.Email)
+          console.log("this.reg_account.Name: " ,this.reg_account.Name)
+          console.log("this.reg_account.Password: ",this.reg_account.Password)
+          console.log("this.reg_account.Password_confirm: ",this.reg_account.Password_confirm)
+          console.log("this.reg_account.PhoneNumber: ",this.reg_account.PhoneNumber)
+          console.log("no fieled")
         } else {
           this.post_register_account()
         }

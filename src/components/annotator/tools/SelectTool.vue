@@ -1,5 +1,7 @@
 <template>
-  <div><i v-tooltip.right='tooltip' class='fa' :class='icon' :style='{ color: iconColor, fontSize: fontSize + "px" }' @click='click'></i><br></div>
+  <!-- <div><i v-tooltip.right='tooltip' class='fa' :class='icon' :style='{ color: iconColor, fontSize: fontSize + "px" }' @click='click'></i><br></div> -->
+  <!-- tooltip이 커서 가리나? -->
+  <div><i class='fa' :class='icon' :style='{ color: iconColor, fontSize: fontSize + "px" }' @click='click'></i><br></div>
 </template>
 
 <script>
@@ -420,12 +422,12 @@ export default {
     isDisabled() {
       return false;
     },
-    tooltip() {
-      if (this.isDisabled) {
-        return this.name + " (select an annotation to activate tool)";
-      }
-      return this.name + " Tool";
-    }
+    // tooltip() {
+    //   if (this.isDisabled) {
+    //     return this.name + " (select an annotation to activate tool)";
+    //   }
+    //   return this.name + " Tool";
+    // }
   },
   watch: {
     keypoint(keypoint) {

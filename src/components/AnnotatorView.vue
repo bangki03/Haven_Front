@@ -497,7 +497,6 @@
         this.load_data()
       },
       selectFilter1(index) {
-        console.log("selectFilter1!!!!")
         this.selectedFilter1 = index
         let end_date = new Date()
         let start_date = new Date()
@@ -514,13 +513,11 @@
           start_date.setFullYear(end_date.getFullYear() - 1)
         }
         else {
-          console.log("날짜 직접선택")
           start_date = this.calendarPicker.DateRange[0]
           end_date = this.calendarPicker.DateRange[1]
         }
         this.filter.end_date = this.DateToString(end_date)
         this.filter.start_date = this.DateToString(start_date)
-        // console.log(start_date)
         this.load_data()
       },
       selectFilter2(index) {
@@ -558,7 +555,7 @@
           this.filter.order_by = "novelty"
         }
         else {
-          console.log("## [Filter] : else3")
+          console.log("Filter3 - else")
         }
 
         this.load_data()
@@ -653,7 +650,7 @@
               this.datalist[index].image_file_path_origin =  items.image_file_path
 
               // 배포
-              this.datalist[index].image_file_path =  items.image_file_path.split('/').slice(3).join('/')
+              this.datalist[index].image_file_path =  "../project/" + items.image_file_path.split('/').slice(3).join('/')
               this.datalist[index].image_filename =  items.image_file_path.split('/').slice(2).join('/')
 
               // console.log("FileName 확인하자!!! : " + items.image_file_path.split('/').slice(3).join('/'))
@@ -663,6 +660,8 @@
               // this.datalist[index].image_file_path =  items.image_file_path
               // this.datalist[index].image_filename =  items.image_file_path.split('/').slice(5).join('/')
             }
+            console.log("load_data datalist")
+            console.log(this.datalist)
 
             if(this.index_image.num_items > 1) {
               this.click_ThumbnailCard_by_Index(1)
@@ -681,13 +680,12 @@
         // paper & canvas 초기화
         this.index_image.index_inPage = index + 1
         this.index_image.index_inTotalList = (this.index_image.currentPage - 1) * this.index_image.num_items_per_page + this.index_image.index_inPage
-        console.log("[click_ThumbnailCard] page: " + this.index_image.currentPage)
-        console.log("[click_ThumbnailCard] index_inPage: " + this.index_image.index_inPage)
-        console.log("[click_ThumbnailCard] index_inTotalList: " + this.index_image.index_inTotalList)
 
 
         this.current.category = 0
         this.current.annotation = -1
+        // console.log("[click_ThumbnailCard] this.current.category : " + this.current.category)
+        // console.log("[click_ThumbnailCard] this.current.annotation : " + this.current.annotation)
         // this.categories[0].annotations = []
 
         // console.log("[TEST] : "+ data.image_file_path)
@@ -717,6 +715,7 @@
         newEditor.classList.add("canvas");
         newEditor.setAttribute("id", "editor");
         newEditor.setAttribute("ref", "image");
+        newEditor.style.cursor = this.cursor
         // newEditor.setAttribute("resize", "");
         newEditor.width = width;
         newEditor.height = height;
@@ -740,16 +739,16 @@
         ///////////////////////////////////
         this.selected_data.thumbnail = data
 
+        // this.current.category = 0
+        // this.current.annotation = 0
+        // console.log("[click_ThumbnailCard] this.current.category : " + this.current.category)
+        // console.log("[click_ThumbnailCard] this.current.annotation : " + this.current.annotation)
       },
 
       click_ThumbnailCard_by_Index(index) {
         this.index_image.currentPage = Math.floor(index / 4) + 1
         this.index_image.index_inPage = index % 4
         this.index_image.index_inTotalList = index
-
-        console.log("[click_ThumbnailCard_by_Index] page: " + this.index_image.currentPage)
-        console.log("[click_ThumbnailCard_by_Index] index_inPage: " + this.index_image.index_inPage)
-        console.log("[click_ThumbnailCard_by_Index] index_inTotalList: " + this.index_image.index_inTotalList)
 
         // if(index > this.datalist.length) {alert('Error(301)')}
 
@@ -786,6 +785,7 @@
         newEditor.setAttribute("id", "editor");
         newEditor.setAttribute("ref", "image");
         // newEditor.setAttribute("resize", "");
+        newEditor.style.cursor = this.cursor
         newEditor.width = width;
         newEditor.height = height;
 
@@ -808,21 +808,19 @@
         ///////////////////////////////////
         this.selected_data.thumbnail = this.datalist[index-1]
 
+        // this.current.category = 0
+        // this.current.annotation = 0
+
       },
 
       //////////////////////////////////////////////////////////////////////////////////
 
       // Categorypanel 의 prop(category) 변경 error 개선 위한 emit 함수
       createAnnotation_push(data) {
-        console.log("[AnnotatorView][createAnnotation_push]")
-        console.log("###################################### this.categories - before ######################################")
-        console.log(this.categories)
         // this.category.annotations.push(data);
         this.categories[0].annotations.push(data);
         this.categories[0].annotations[0].width = this.image.width;
         this.categories[0].annotations[0].height = this.image.height;
-        console.log("###################################### this.categories - after ######################################")
-        console.log(this.categories)
       },
       onUpdateClick_keypoint_labels(data) {
         this.category.keypoint_labels = [...data];
@@ -884,27 +882,12 @@
 
       // Current Annotation Operations
       uniteCurrentAnnotation(compound, simplify = true, undoable = true, isBBox = false) {
-        console.log("[AnnotatorView][uniteCurrentAnnotation] - compound ")
-        console.log(compound)
-        console.log("[AnnotatorView][uniteCurrentAnnotation] - this.currentAnnotation (before)")
-        if(this.currentAnnotation == null) {
-          console.log(null)
-        }
-        else {
-          console.log(this.currentAnnotation.annotation)
-        }
         if (this.currentAnnotation == null) return;
         this.currentAnnotation.unite(compound, simplify, undoable, isBBox);
-        console.log("[AnnotatorView][uniteCurrentAnnotation] - this.currentAnnotation (after)")
-        console.log(this.currentAnnotation.compoundPath)
       },
       subtractCurrentAnnotation(compound, simplify = true, undoable = true) {
-        console.log("[AnnotatorView][subtractCurrentAnnotation] - compound ")
-        console.log(compound)
         if (this.currentCategory == null) return;
         this.currentAnnotation.subtract(compound, simplify, undoable);
-        console.log("[AnnotatorView][subtractCurrentAnnotation] - this.currentAnnotation ")
-        console.log(this.currentAnnotation.annotation)
       },
 
       // AnnotationPanel -> CategoryPanel -> AnnotatorView 로 2중 emit으로 category.annotate 바꾸는 함수
@@ -958,7 +941,6 @@
           let delta = new paper.Point(0.5 * e.deltaY, 0);
           this.paper.view.setCenter(view.center.add(delta));
         } else {
-          console.log("onWheel - else(ctrlkey)")
           let viewPosition = view.viewToProject(
             new paper.Point(e.offsetX, e.offsetY)
           );
@@ -987,8 +969,6 @@
       },
       fit() {
         let canvas = document.getElementById("editor");
-        console.log("[AnnotatorView][fit] - canvas :")
-        console.log(canvas)
 
         let parentX = this.image.raster.width;
         let parentY = this.image.raster.height;
@@ -997,26 +977,20 @@
           (canvas.width / parentX) * 0.95,
           (canvas.height / parentY) * 0.8
         );
-        console.log("this.paper.view.zoom: "+  this.paper.view.zoom)
 
         this.image.scale = 1 / this.paper.view.zoom;
         this.paper.view.setCenter(0, 0);
       },
 
       setCursor(newCursor) {
-        console.log("[newCursor]")
-        console.log(newCursor)
         this.cursor = newCursor;
       },
       initCanvas() {
-        console.log("[AnnotatorView][initCanvas]")
 
         // let process = "Initializing canvas";
         // this.addProcess(process);
         this.loading.image = true;
         let canvas = document.getElementById("editor");
-        console.log("###################################### HERE ################################# Canvas")
-        console.log(canvas)
         this.paper.setup(canvas);
         this.paper.view.viewSize = [
           // 100, 100
@@ -1026,14 +1000,11 @@
           // (window.innerHeight - 65 ) * 0.8,
           canvas.offsetWidth, canvas.offsetHeight
         ];
-        console.log("#################################### this.paper.view.viewSize ####################################")
-        console.log(this.paper.view.viewSize)
 
         this.paper.activate();
 
         this.image.raster = new paper.Raster(this.image.url);
-        console.log("[AnnotatorView][initCanvas] - Canvas")
-        console.log(canvas)
+
         // setTimeout(() => {
         //   this.image.raster.onLoad = () => {
         //   let width = this.image.raster.width;
@@ -1079,15 +1050,10 @@
 
 
         this.image.raster.onLoad = () => {
-          console.log('[AnnotatorView][initCanvas] - onloaded')
           let width = this.image.raster.width;
           let height = this.image.raster.height;
           console.log('[AnnotatorView][initCanvas] - image_url : ' + this.image.url)
-          console.log('[AnnotatorView][initCanvas] - (width x height) : ' + width + "x"+ height)
-          console.log('[AnnotatorView][initCanvas] - this.image')
-          console.log(this.image)
 
-          console.log("[AnnotatorView][initCanvas][sendToBack]")
           this.image.raster.sendToBack();
           this.fit();
           this.image.ratio = (width * height) / 1000000;
@@ -1109,7 +1075,6 @@
           this.text.topLeft.fontSize = fontSize;
           this.text.topLeft.fillColor = "white";
           this.text.topLeft.content = this.image.filename;
-          console.log("image.filename: "+this.image.filename)
 
           let positionTopRight = new paper.Point(
             width / 2,
@@ -1238,7 +1203,6 @@
         }
 
         this.$nextTick(() => {
-          console.log('[AnnotatorView][getData1] - showAll')
           this.showAll();
         });
       },
@@ -1264,21 +1228,16 @@
             visualize: false,
           },
         ]
-        console.log('[created][AnnotatorView][initData] - this.categories')
-        console.log(this.categories)
       },
 
 
 
       showAll() {
-        console.log("[AnnotationView][showAll]")
         if (this.$refs.category == null) return;
 
         this.$refs.category.forEach(category => {
           // category.isVisible = category.category.annotations.length > 0;
           category.isVisible = true
-          console.log("[AnnotationView][showAll] - category.isVisible")
-          console.log(category.isVisible)
         });
       },
       hideAll() {
@@ -1308,15 +1267,10 @@
         if (index < 0) return null;
 
         let ref = this.$refs.category;
-        console.log('[AnnotatorView][getCategory] - index : ' + index)
-        console.log('[AnnotatorView][getCategory] - ref : ')
-        console.log(ref)
 
         if (ref == null) return null;
         if (ref.length < 1 || index >= ref.length) return null;
 
-        console.log('[AnnotatorView][getCategory] - this.$refs.category[index]')
-        console.log(this.$refs.category[index])
 
         return this.$refs.category[index];
       },
@@ -1344,12 +1298,8 @@
         if (refs.category != null && this.mode === "segment") {
           refs.category.forEach(category => {
             let categoryData = category.export();
-            console.log("[AnnotatorView][save1] - categoryData")
-            console.log(categoryData)
 
             data.annotations.push(categoryData.annotations[0])
-            console.log("[AnnotatorView][save1] - data.annotations")
-            console.log(data.annotations)
             delete data.annotations[0].id
             delete data.annotations[0].color
             delete data.annotations[0].fillcolor
@@ -1358,8 +1308,6 @@
             delete data.annotations[0].sessions
           });
         }
-        console.log("[AnnotatorView][save1] - data (after)")
-        console.log(data)
 
         axios
           .post(this.API_List.annotator_save, JSON.stringify(data))
@@ -1375,30 +1323,20 @@
 
       load_annotator() {
         // this.categories = []
-        console.log("[load_annotator]")
         $.ajax({
           url: this.API_List.annotator_load,
           method: "GET",
           dataType: "json",
           data: {
             // 배포
-            image_path: "/iQ.Platform/projects/" + this.image.url,
+            // image_path: "/iQ.Platform/projects/" + this.image.url,
+            image_path: this.image.url_origin,
 
             // test
             // image_path: this.image.url,
           },
         })
         .then((data) => {
-          console.log('[load_annotator] - data.annotations')
-          console.log(data.annotations)
-
-          console.log('[load_annotator] - data.annotations[0]')
-          console.log(data.annotations[0])
-          console.log('[load_annotator] - categories (before)')
-          console.log(this.categories)
-
-          console.log('[load_annotator] - set annotations')
-
           // this.categories[0].annotations = data.annotations
 
           // this.categories[0].annotations.splice(0, 1, data.annotations[0]);
@@ -1416,7 +1354,6 @@
             this.categories[0].annotations[0].height = this.image.height
           }
           else {
-            console.log('[load_annotator] ########################## No Annotations ##########################')
             let annotation1 = {
               area: 0,
               bbox: [0, 0, 0, 0],
@@ -1457,8 +1394,6 @@
           //   'width' : this.image.width,
           //   'height' : this.image.height,
           //   'annotations': data.annotations})
-          console.log('[load_annotator] - categories (after)')
-          console.log(this.categories[0])
 
         })
         .catch((error) => {
@@ -1471,21 +1406,8 @@
         })
         .then(() => {
           this.$nextTick(() => {
-            console.log("[AnnotatorView][load_annotator] : Done loading, So Lets set this.current.annotation = 0")
-            console.log("Check if the getAnnotation set well - 1. this.categories[0].annotations")
-            console.log(this.categories[0].annotations)
-            console.log("Check if the getAnnotation set well - 2. this.$refs.category[0]")
-            console.log(this.$refs.category[0])
-            console.log("Check if the getAnnotation set well - 2-1. this.$refs.category[0].$refs")
-            console.log(this.$refs.category[0].$refs)
-            // console.log("Check if the getAnnotation set well - 3. this.$refs.category[0].$refs.annoation[0]")
-            // console.log(this.$refs.category[0].$refs.annoation[0])
-            console.log("[AnnotationView][load_annotator] - this.current.annotation (현재)")
-            console.log(this.current.annotation)
-            console.log("[AnnotationView][load_annotator] : set this.current.annotation = 0")
             // this.updateCurrentAnnotation(0)
             this.current.annotation = 0
-            console.log("[AnnotationView][load_annotator] : showAll")
             this.showAll();
           });
         })
@@ -1514,25 +1436,14 @@
       // },
 
       route_next() {
-        console.log("[AnnotatorView][route][next]")
         this.index_image.start = Math.max(this.index_image.start + 4, 0);
         this.index_image.end = Math.min(this.index_image.end + 4, this.index_image.limit);
-
-        console.log("[AnnotatorView][route][next] - this.index_image.start : " + this.index_image.start)
-        console.log("[AnnotatorView][route][next] - this.index_image.end : " + this.index_image.end)
-
       },
       route_previous() {
-        console.log("[AnnotatorView][route][previous]")
         this.index_image.start = Math.max(this.index_image.start - 4, 0);
         this.index_image.end = Math.min(this.index_image.end - 4, this.index_image.limit);
-
-        console.log("[AnnotatorView][route][previous] - this.index_image.start : " + this.index_image.start)
-        console.log("[AnnotatorView][route][previous] - this.index_image.end : " + this.index_image.end)
-
       },
       routePage(page) {
-        console.log("routePage: " + page)
         this.index_image.start = (page - 1) * this.index_image.num_items_per_page
         this.index_image.end = page * this.index_image.num_items_per_page;
       },
@@ -1543,18 +1454,15 @@
         axios.get('/api_list.json')
         .then(response => {
           this.API_List = response.data;
-          console.log(this.API_List)
         })
         .catch(error => {
           console.log(error);
         });
       },
       set_APIlist_async() {
-        console.log('[AnnotatorView][set_APIlist_async] - Start')
         return new Promise((resolve, reject) => {
           axios.get('/api_list.json')
           .then(data => {
-            console.log("[set_APIList_async]")
             this.API_List = data.data
             this.loading_API = false;
             resolve()
@@ -1569,28 +1477,11 @@
     },
     watch: {
       'calendarPicker.DateRange'() {
-        console.log(typeof(this.calendarPicker.DateRange[1]))
         if(typeof(this.calendarPicker.DateRange[0]) != 'undefined' && typeof(this.calendarPicker.DateRange[1]) != 'undefined'){
           this.selectFilter1(4)
         }
       },
-      'index_image.num_items'() {
-        console.log("this.index_image.num_items : " + this.index_image.num_items)
-        console.log("this.index_image.start : " + this.index_image.start)
-        console.log("this.index_image.end : " + this.index_image.end)
-      },
-      "activeTool"(after, before){
-        console.log("[watch][activeTool] - before")
-        console.log(before)
-        console.log("[watch][activeTool] - after")
-        console.log(after)
-      },
-      "categories"(after, before) {
-        console.log("[watch][categories] - before")
-        console.log(before)
-        console.log("[watch][categories] - after")
-        console.log(after)
-      },
+
 
       // "annotation"
       // doneLoading(done) {
@@ -1601,59 +1492,56 @@
       //   }
       // },
       currentCategory() {
-        console.log("[watch][AnnotatorView][currentCategory]")
         if (this.currentCategory != null) {
           if (this.currentAnnotation == null || !this.currentCategory.showAnnotations) {
             let element = this.currentCategory.$el;
             this.scrollElement(element);
           }
         }
-        console.log("watch > currnetCategory > this.current :")
-        console.log(this.current)
       },
       currentAnnotation(newElement) {
-        console.log("[watch][AnnotatorView][currentAnnotation]")
         if (newElement != null) {
           if (newElement.showAnnotations) {
             let element = newElement.$el;
             this.scrollElement(element);
           }
         }
-        console.log("watch > currentAnnotation > this.current :" + this.current)
-        console.log(this.current)
       },
-      "current.category"(cc) {
-        console.log("[watch][AnnotatorView][current.category]")
-        console.log("watch > current.category > this.current :" + this.current)
-        console.log(this.current)
-        if (cc < -1) this.current.category = -1;
-        let max = this.categories.length;
-        if (cc > max) {
-          this.current.category = -1;
-        }
-      },
-      "current.annotation"(ca) {
-        console.log("[watch][AnnotatorView][current.annotation]")
-        console.log("watch > current.annotation > this.current :" + this.current)
-        console.log(this.current)
-        if (ca < -1) this.current.annotation = -1;
-        if (this.currentCategory != null) {
-          let max = this.currentAnnotationLength;
-          if (ca > max) {
-            this.current.annotations = -1;
-          }
-        }
-      },
-      "current.keypoint"(sk) {
-        console.log("[watch][AnnotatorView][current.keypoint]")
-        if (sk < -1) this.current.keypoint = -1;
-        if (this.currentCategory != null) {
-          let max = this.currentAnnotationLength;
-          if (sk > max) {
-            this.current.keypoint = -1;
-          }
-        }
-      },
+
+      // 이게 잔상 남게하나?
+      // "current.category"(cc) {
+      //   if (cc < -1) this.current.category = -1;
+      //   let max = this.categories.length;
+      //   if (cc > max) {
+      //     this.current.category = -1;
+      //   }
+      // },
+      // "current.annotation"(ca) {
+      //   if (ca < -1) this.current.annotation = -1;
+      //   if (this.currentCategory != null) {
+      //     let max = this.currentAnnotationLength;
+      //     if (ca > max) {
+      //       this.current.annotations = -1;
+      //     }
+      //   }
+      // },
+      // "current.keypoint"(sk) {
+      //   if (sk < -1) this.current.keypoint = -1;
+      //   if (this.currentCategory != null) {
+      //     let max = this.currentAnnotationLength;
+      //     if (sk > max) {
+      //       this.current.keypoint = -1;
+      //     }
+      //   }
+      // },
+
+      "cursor"() {
+        console.log('[Watch]cursor : ', this.cursor)
+      }
+      
+
+
+
       // annotating() {
       //   console.log("[watch][AnnotatorView][annotating]")
       //   this.removeFromAnnotatingList();
@@ -1680,20 +1568,12 @@
       //   return this.currentAnnotation.annotation.keypoints.length;
       // },
       currentCategory() {
-        console.log("[computed][AnnotatorView][currentCategory] - this.current.category")
-        console.log(this.current.category)
-        console.log("[computed][AnnotatorView][currentCategory] - this.getCategory(this.current.category)")
-        console.log(this.getCategory(this.current.category))
         return this.getCategory(this.current.category);
       },
       currentAnnotation() {
-        console.log("[computed][AnnotatorView][currentAnnotation] - this.current.annotation")
-        console.log(this.current.annotation)
         if (this.currentCategory == null) {
           return null;
         }
-        console.log("[computed][AnnotatorView][currentAnnotation] - this.currentCategory.getAnnotation(this.current.annotation)")
-        console.log(this.currentCategory.getAnnotation(this.current.annotation))
         return this.currentCategory.getAnnotation(this.current.annotation);
       },
       // currentKeypoint() {
@@ -1719,24 +1599,15 @@
       // }
     },
     created() {
-      console.log('[created][AnnotationView]')
+      this.$emit("emit_selectedMenu", 0)
       this.initData()
       this.loading_created = true
-      // console.log("[created][AnnotationView] this.categories ######################################")
-      // console.log(this.categories)
-      // console.log("!!!!!!!!!!!!!!! PAPER - before Declaration !!!!!!!!!!!!!!!")
-      // console.log(this.paper)
-      console.log("[created][AnnotationView] - paper (before)")
-      console.log(this.paper)
+
       this.paper = new paper.PaperScope();
-      console.log("[created][AnnotationView] - paper (after)")
-      console.log(this.paper)
 
       // Test API config 파일 불러오기.
       this.set_APIlist_async()
       .then(() => {
-        console.log("[created][AnnotationView] - then1")
-        console.log(this.API_List)
         this.selectFilter_created()
       })
       .then(() => {
@@ -1744,8 +1615,6 @@
         // this.load_annotator();
       })
       .then(() => {
-        console.log("[created][AnnotationView] - then3")
-        console.log("[created][AnnotationView] - this.loading_created : false")
         this.loading_created = false
       })
       .catch(error => {
@@ -1759,25 +1628,12 @@
     },
 
     mounted() {
-      console.log('[mounted][AnnotatorView]')
-      // console.log("[mounted][AnnotationView] this.categories ######################################")
-      // console.log(this.categoires)
-      // this.getData1();
       // this.initCanvas();
 
       // this.initAnnotation(this.current.category)
-      console.log('[mounted][AnnotatorView] - Mounted Done, Lets set current.category = 0')
       this.current.category = 0
-      console.log('[mounted][AnnotatorView] - Mounted Done, Lets set current.annotation = 0')
       this.current.annotation = 0
 
-      console.log("Check if the getAnnotation set well - 2-1. this.$refs.category[0].$refs")
-      console.log(this.$refs.category[0].$refs)
-
-
-
-      console.log("RightNoW!!!!!!!!!!!!!!!!!!")
-      console.log("activeTool: " + this.activeTool)
     },
 
   };

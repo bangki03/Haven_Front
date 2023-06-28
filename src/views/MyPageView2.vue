@@ -21,8 +21,8 @@
           </div> -->
 
           <div style="display:inline-flex; flex-direction: row; align-items: top; margin: 0.5em 0.5em 0.5em 1.0em; padding: 0; color: white;">
-              <i class="fa fa-sign-out" aria-hidden="true" style="margin-top: 0.25rem;" @click="Logout"></i>
-              <p style="margin-bottom: 0; margin-left:0.75em;" @click="Logout"> 로그아웃</p>
+              <i class="fa fa-sign-out" aria-hidden="true" style="margin-top: 0.25rem; cursor: pointer;" @click="Logout"></i>
+              <p style="margin-bottom: 0; margin-left:0.75em; cursor: pointer;" @click="Logout"> 로그아웃</p>
           </div>
 
       </div>

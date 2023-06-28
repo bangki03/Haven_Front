@@ -141,7 +141,13 @@ export default{
         },
 
         handleBtnSelected(model) {
-            this.selected_model.push(model);
+            if(this.selected_model.length == 2) {
+                alert("최대 2개 모델 선택 가능합니다.")
+            }
+            else {
+                this.selected_model.push(model);
+            }
+            
         },
         handleBtnUnSelected(model){
             this.selected_model = this.selected_model.filter(item => item.id !== model.id);

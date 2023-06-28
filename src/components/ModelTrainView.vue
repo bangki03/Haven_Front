@@ -184,41 +184,46 @@ export default{
         },
         load_model_deployed() {
             $.ajax({
-                url: "http://183.105.120.175:30004/ai-model/deployed", // 클라이언트가 HTTP 요청을 보낼 서버의 URL 주소
+                url: "http://183.105.120.175:30004/ai-model/deployed/" + this.$store.state.project.id, // 클라이언트가 HTTP 요청을 보낼 서버의 URL 주소
                 method: "GET",   // HTTP 요청 메소드(GET, POST 등)
                 dataType: "json", // 서버에서 보내줄 데이터의 타입
-                data: {
-                    project_id: this.$store.state.project.id,
-                }
+                // data: {
+                //     project_id: Number(this.$store.state.project.id),
+                // }
             })
             .then( data => {
+                this.model_deployed.deployed_ai_model = data.deployed_ai_model;
                 this.model_deployed.ok_data_count = data.trainable_data_count.ok_data_count
                 this.model_deployed.ng_data_count = data.trainable_data_count.ng_data_count
-                this.load_model(data.deployed_ai_model)
+                // this.load_model(data.deployed_ai_model)
             })
 
         },
-        load_model(id) {
-            $.ajax({
-                url: "http://183.105.120.175:30004/ai-model/deployed", // 클라이언트가 HTTP 요청을 보낼 서버의 URL 주소
-                method: "GET",   // HTTP 요청 메소드(GET, POST 등)
-                dataType: "json", // 서버에서 보내줄 데이터의 타입
-                data: {
-                    ai_model_id : id,
-                }
-            })
-            .then( data => {
-                this.model_deployed.deployed_ai_model = data;
-            })
-        },
+        // load_model(id) {
+        //     $.ajax({
+        //         url: "http://183.105.120.175:30004/ai-model/deployed", // 클라이언트가 HTTP 요청을 보낼 서버의 URL 주소
+        //         method: "GET",   // HTTP 요청 메소드(GET, POST 등)
+        //         dataType: "json", // 서버에서 보내줄 데이터의 타입
+        //         data: {
+        //             ai_model_id : id,
+        //         }
+        //     })
+        //     .then( data => {
+        //         this.model_deployed.deployed_ai_model = data;
+        //     })
+        // },
 
         click_page(page) {
             this.currentPage = page
             this.load_modellist()
         },
     },
+    created() {
+        this.$emit("emit_selectedMenu", 1)
+    },
 
     mounted() {
+        this.load_model_deployed()
         this.load_modellist()
     },
     beforeUnmount() {

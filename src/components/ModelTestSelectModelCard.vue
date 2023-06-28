@@ -1,7 +1,7 @@
 <template>
     <div style="height: 55px; width:100%; display:grid; grid-template-columns: 1fr 3.0fr 3.0fr 2.5fr 2fr 2.5fr 0.5fr 2fr 2fr 1.5fr; justify-items: stretch; justify-content: center; align-items: center; overflow:hidden">
-        <div v-if="modelInfo.train_status == 'FINISHED'" class="form-check" style="width:1.5em; margin-left:2rem;">
-            <input class="form-check-input" type="checkbox" :name="'Radio${modelInfo.id}'" :id="'Radio${modelInfo.id}'" v-model="selectedBtn">
+        <div class="form-check" style="width:1.5em; margin-left:2rem;">
+            <input class="form-check-input" type="checkbox" :name="'Radio${modelInfo.id}'" :id="'Radio${modelInfo.id}'" v-model="selectedBtn" :disabled="modelInfo.train_status !== 'FINISHED'">
             <label class="form-check-label" :for="'Radio${modelInfo.id}'"></label>
         </div>
         <p style="font-family: Poppins-SemiBold; font-size:1.0rem; margin: auto 0.5em auto 0.5em;">{{ modelInfo.train_start_time || "-" }}</p>
