@@ -2,7 +2,7 @@
   <div v-show="brush.isActive">
 
     <div style="height:200px;">
-      <Slider class="slider-blue" v-model="brush_radius" orientation="vertical" direction="rtl" :tooltips=true :min=0 :max=200
+      <Slider class="slider-blue" v-model="brush_radius" orientation="vertical" direction="rtl" :tooltips=true :min=0 :max=20
       style="height:inherit"
       @update="update_value"
       />
@@ -34,11 +34,12 @@ export default {
     brush: {
       type: Object,
       required: true
-    }
+    },
+    radius: Number,
   },
   data() {
     return{
-      brush_radius : this.brush.brush.pathOptions.radius
+      brush_radius : this.radius
     }
   },
   methods: {
@@ -48,6 +49,11 @@ export default {
       this.$emit('update', this.brush_radius)
     },
   },
+  watch: {
+    "radius"(newValue) {
+      this.brush_radius = newValue
+    }
+  }
 };
 </script>
 

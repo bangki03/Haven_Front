@@ -129,22 +129,16 @@ export default {
         pref.radius || this.brush.pathOptions.radius;
     },
     click() {
-      console.log("Brushhhhhhhhhhhhh")
       this.update();
     },
     update() {
-      console.log("[BrushTool][click][update] - this.name")
-      console.log(this.name)
       if (this.isDisabled) return;
 
       this.$emit("update", this.name);
-      console.log("BrushTool > update() : console Parents")
-      console.log(this.$parent)
     },
   },
   computed: {
     isActive() {
-      console.log("[computed brush] isActive")
       if (this.selected == this.name) {
         this.$emit("setcursor", this.cursor);
         return true;

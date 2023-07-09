@@ -73,11 +73,11 @@ export default {
         this.tool.activate();
       }
     },
-    isDisabled(disabled) {
-      if (disabled && this.isActive) {
-        this.$emit("update", "Select");
-      }
-    }
+    // isDisabled(disabled) {
+    //   if (disabled && this.isActive) {
+    //     this.$emit("update", "Select");
+    //   }
+    // }
   },
   mounted() {
     this.tool = new paper.Tool();

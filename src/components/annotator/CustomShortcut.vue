@@ -68,8 +68,9 @@ export default {
       if (parseInt(e.target.id) === this._uid) {
         e.preventDefault();
         this.keys = this.keysDown;
-      } else if (this.$route.name === "annotate") {
+      } else if (this.$route.name === "AnnotatorView") {
         if (this.keysDown.sort().join(",") === this.keys.sort().join(",")) {
+          console.log("this.keysDwon: ", this.keysDwon)
           this.function(e);
         }
       }
@@ -90,16 +91,21 @@ export default {
     }
   },
   created() {
+    console.log("Created CustomShortcut.vue")
     window.addEventListener("keyup", (this.onKeyup = this.onkeyup.bind(this)));
     window.addEventListener(
       "keydown",
       (this.onKeydown = this.onkeydown.bind(this))
     );
   },
-  destroyed() {
+  // destroyed() {
+  //   window.removeEventListener("keydown", this.onKeydown);
+  //   window.removeEventListener("keydup", this.onKeyup);
+  // },
+  unmounted() {
     window.removeEventListener("keydown", this.onKeydown);
     window.removeEventListener("keydup", this.onKeyup);
-  }
+  },
 };
 </script>
 

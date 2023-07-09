@@ -31,7 +31,7 @@ export default createStore({
     },
     saveSessionStorageLogin(state) {
       sessionStorage.setItem("account", JSON.stringify(state.account))
-      
+
       console.log('#### store - saveLoginSession')
       console.log(state.account)
       console.log("############################")
@@ -63,7 +63,7 @@ export default createStore({
     },
     saveSessionStorageProject(state) {
       sessionStorage.setItem("project", JSON.stringify(state.project))
-      
+
       console.log('#### store - saveProjectSession')
       console.log(state.project)
       console.log("############################")
@@ -94,7 +94,7 @@ export default createStore({
       sessionStorage.setItem("indexMenu", JSON.stringify(state.menu))
       console.log("saveSessionStorageMenu")
     },
-    
+
     setMenu(state, index) {
       state.menu.index = index
 
@@ -103,7 +103,12 @@ export default createStore({
       console.log("############################")
     },
 
-
+    undo(state) {
+      let action = state.undo.pop();
+      if (action != null) {
+        action.undo();
+      }
+    },
     addUndo(state, action) {
       state.undo.push(action);
     },

@@ -242,6 +242,7 @@ export default {
         this.hover.box = null;
       }
     },
+    // keypoint 위에 동그라미 만드는 것
     createPoint(point) {
       if (this.point != null) {
         this.point.remove();
@@ -359,7 +360,8 @@ export default {
             annotationId
           );
           event.item.selected = true;
-          this.hoverText();
+          // 임시로 제거
+          // this.hoverText();
         }
       } else if (
         // event.item && event.item.hasOwnProperty("keypoint")
@@ -393,14 +395,14 @@ export default {
     },
 
     // tool.js
-    // click() {
-    //   this.update();
-    // },
-    // update() {
-    //   if (this.isDisabled) return;
+    click() {
+      this.update();
+    },
+    update() {
+      if (this.isDisabled) return;
 
-    //   this.$emit("update", this.name);
-    // },
+      this.$emit("update", this.name);
+    },
   },
   // too.js
   computed: {
@@ -463,6 +465,7 @@ export default {
     },
     isActive(active) {
       if (active) {
+        console.log("SelectTool activate")
         this.tool.activate();
       } else {
         if (this.hover.text) {

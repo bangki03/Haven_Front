@@ -54,7 +54,7 @@
               </div>
             </div>
 
-            <Metadata :metadata="metadata" ref="metadata" />
+            <!-- <Metadata :metadata="metadata" ref="metadata" /> -->
 
             <p style="margin: 30px 0 0 0">Keyboard Shortcuts</p>
 
@@ -92,17 +92,20 @@
 </template>
 
 <script>
-import Metadata from "@/components/Metadata";
+// import Metadata from "@/components/Metadata";
 import CustomShortcut from "@/components/annotator/CustomShortcut";
 
 export default {
   name: "SettingsButton",
-  components: { CustomShortcut, Metadata },
+  components: {
+    CustomShortcut,
+    // Metadata
+  },
   props: {
-    metadata: {
-      type: Object,
-      required: true
-    },
+    // metadata: {
+    //   type: Object,
+    //   required: true
+    // },
     commands: {
       type: Array,
       required: true
@@ -114,9 +117,9 @@ export default {
     };
   },
   methods: {
-    exportMetadata() {
-      return this.$refs.metadata.export();
-    },
+    // exportMetadata() {
+    //   return this.$refs.metadata.export();
+    // },
     export() {
       let data = { shortcuts: [] };
       this.$refs.shortcuts.forEach(shortcut => {

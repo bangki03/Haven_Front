@@ -2,7 +2,7 @@
   <div v-show="eraser.isActive">
 
     <div style="height:200px;">
-      <Slider class="slider-blue" v-model="eraser_radius" orientation="vertical" direction="rtl" :tooltips=true :min=0 :max=200
+      <Slider class="slider-blue" v-model="eraser_radius" orientation="vertical" direction="rtl" :tooltips=true :min=0 :max=20
       style="height:inherit"
       @update="update_value"
       />
@@ -34,11 +34,12 @@ export default {
     eraser: {
       type: Object,
       required: true
-    }
+    },
+    radius: Number,
   },
   data() {
     return{
-      eraser_radius : this.eraser.eraser.pathOptions.radius
+      eraser_radius : this.radius
     }
   },
   methods: {
@@ -46,6 +47,11 @@ export default {
       this.$emit('update', this.eraser_radius)
     },
   },
+  watch: {
+    "radius"(newValue) {
+      this.eraser_radius = newValue
+    }
+  }
 };
 </script>
 

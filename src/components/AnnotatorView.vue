@@ -150,8 +150,8 @@
 
             <!-- <BrushSizePanel v-if="activeTool=='Brush'" @update="update_brush_radius" style="display:flex; justify-content: center; width: 84px; top:0;"/> -->
 
-            <BrushPanel :brush="$refs.brush" v-if="activeTool=='Brush'" @update="update_brush_radius" style="display:flex; justify-content: center; width: 84px; top:0;"/>
-            <EraserPanel :eraser="$refs.eraser" v-else-if="activeTool=='Eraser'" @update="update_eraser_radius" style="display:flex; justify-content: center; width: 84px; top:0;"/>
+            <BrushPanel :brush="$refs.brush" v-if="activeTool=='Brush'" @update="update_brush_radius" :radius="this.$refs.brush.brush.pathOptions.radius" style="display:flex; justify-content: center; width: 84px; top:0;"/>
+            <EraserPanel :eraser="$refs.eraser" v-else-if="activeTool=='Eraser'" @update="update_eraser_radius" :radius="this.$refs.eraser.eraser.pathOptions.radius" style="display:flex; justify-content: center; width: 84px; top:0;"/>
             <div v-else style="height:200px;"></div>
 
 
@@ -189,6 +189,11 @@
 
             <SaveButton />
             <div style="height:80px;"></div>
+
+            <SettingsButton
+              :commands="commands"
+              ref="settings"
+            />
 
 
           </aside>
@@ -274,6 +279,7 @@
   import paper from "paper";
   import axios from "axios";
   import $ from "jquery";
+  import shortcuts from "@/mixins/shortcuts";
   // import { usePinch } from '@vueuse/touch'
 
   // import { mapMutations } from "vuex";
@@ -296,6 +302,7 @@
   import BrushPanel from "@/components/annotator/panels/BrushPanel";
   import EraserPanel from "@/components/annotator/panels/EraserPanel";
   import SaveButton from "@/components/annotator/tools/SaveButton";
+  import SettingsButton from "@/components/annotator/tools/SettingsButton";
 
 
 
@@ -311,10 +318,12 @@
       BrushPanel,
       EraserPanel,
       SaveButton,
+      SettingsButton,
       VPagination,
       Datepicker: VueDatepickerUi,
 
     },
+    mixins:[shortcuts],
     // setup() {
     //   const { start, move, end } = usePinch()
 
@@ -350,6 +359,7 @@
           thumbnail: null,
         },
 
+        state: "ready", // ready: 준비상태 or onload 에러상태, loading: 로딩중상태, done: onload 완료상태
         tools: [],
         loading_created : true,
 
@@ -651,9 +661,9 @@
 
               // 배포
               this.datalist[index].image_file_path =  "../project/" + items.image_file_path.split('/').slice(3).join('/')
-              this.datalist[index].image_filename =  items.image_file_path.split('/').slice(2).join('/')
+              this.datalist[index].image_filename =  items.image_file_path.split('/').slice(3).join('/')
 
-              // console.log("FileName 확인하자!!! : " + items.image_file_path.split('/').slice(3).join('/'))
+              console.log("FileName 확인하자!!! : " + this.datalist[index].image_filename)
               // /iQ.Platform/projects/1/data/2023-05-22/16-03-53/49_origin.jpg -> slice(4) /1/data/2023-05-22/16-03-53/49_origin.jpg 이렇게 요청됨
 
               //test
@@ -677,10 +687,10 @@
 
       //////////////////////////////////// Thumbnail ////////////////////////////////////
       click_ThumbnailCard(event, data, index) {
+        this.state = "loading"
         // paper & canvas 초기화
         this.index_image.index_inPage = index + 1
         this.index_image.index_inTotalList = (this.index_image.currentPage - 1) * this.index_image.num_items_per_page + this.index_image.index_inPage
-
 
         this.current.category = 0
         this.current.annotation = -1
@@ -699,8 +709,6 @@
         console.log("[click_ThumbnailCard] set image url : " + this.image.url)
         this.load_annotator() // 완료되면 얘가 current.annotation = 0 로 바꿔줌
 
-
-
         let canvas = document.getElementById("editor");
         let width = canvas.offsetWidth
         let height = canvas.offsetHeight
@@ -715,8 +723,8 @@
         newEditor.classList.add("canvas");
         newEditor.setAttribute("id", "editor");
         newEditor.setAttribute("ref", "image");
-        newEditor.style.cursor = this.cursor
         // newEditor.setAttribute("resize", "");
+        newEditor.style.cursor = this.cursor
         newEditor.width = width;
         newEditor.height = height;
 
@@ -730,7 +738,6 @@
 
         // 이제 canvas 변수는 새로운 editor 요소를 참조하게 됩니다.
         canvas = newEditor;
-
 
         this.initCanvas();
         // this.getData();
@@ -746,6 +753,7 @@
       },
 
       click_ThumbnailCard_by_Index(index) {
+        this.state = "loading"
         this.index_image.currentPage = Math.floor(index / 4) + 1
         this.index_image.index_inPage = index % 4
         this.index_image.index_inTotalList = index
@@ -767,7 +775,6 @@
         this.image.filename = this.datalist[index-1].image_filename
         console.log("[click_ThumbnailCard] set image url : " + this.image.url)
         this.load_annotator() // 완료되면 얘가 current.annotation = 0 로 바꿔줌
-
 
 
         let canvas = document.getElementById("editor");
@@ -932,15 +939,46 @@
 
         let view = this.paper.view;
 
+        console.log("selectTool:", this.activeTool)
         if (e.ctrlKey) {
           // Pan up and down
-          let delta = new paper.Point(0, 0.5 * e.deltaY);
-          this.paper.view.setCenter(view.center.add(delta));
-        } else if (e.shiftKey) {
+          if(this.activeTool == 'Brush') {
+            if (e.deltaY < 0) {
+              if(this.$refs.brush.brush.pathOptions.radius > 1) {
+                this.$refs.brush.brush.pathOptions.radius = this.$refs.brush.brush.pathOptions.radius - 1
+                console.log("this.$refs.brush.brush.pathOptions.radius:", this.$refs.brush.brush.pathOptions.radius)
+              }
+            }
+            else {
+              // 휠을 내릴 때
+              if(this.$refs.brush.brush.pathOptions.radius < 20) {
+                this.$refs.brush.brush.pathOptions.radius = this.$refs.brush.brush.pathOptions.radius + 1
+                console.log("this.$refs.brush.brush.pathOptions.radius:", this.$refs.brush.brush.pathOptions.radius)
+              }
+            }
+          }
+          else if(this.activeTool == 'Eraser') {
+            if (e.deltaY < 0) {
+              if(this.$refs.eraser.eraser.pathOptions.radius > 1) {
+                this.$refs.eraser.eraser.pathOptions.radius = this.$refs.eraser.eraser.pathOptions.radius - 1
+                console.log("this.$refs.eraser.eraser.pathOptions.radius:", this.$refs.eraser.eraser.pathOptions.radius)
+              }
+            }
+            else {
+              // 휠을 내릴 때
+              if(this.$refs.eraser.eraser.pathOptions.radius < 20) {
+                this.$refs.eraser.eraser.pathOptions.radius = this.$refs.eraser.eraser.pathOptions.radius + 1
+                console.log("this.$refs.eraser.eraser.pathOptions.radius:", this.$refs.eraser.eraser.pathOptions.radius)
+              }
+            }
+          }
+        }
+        else if (e.shiftKey) {
           // Pan left and right
           let delta = new paper.Point(0.5 * e.deltaY, 0);
           this.paper.view.setCenter(view.center.add(delta));
-        } else {
+        }
+        else {
           let viewPosition = view.viewToProject(
             new paper.Point(e.offsetX, e.offsetY)
           );
@@ -984,6 +1022,7 @@
 
       setCursor(newCursor) {
         this.cursor = newCursor;
+        console.log("setCursor: ", newCursor)
       },
       initCanvas() {
 
@@ -1002,6 +1041,9 @@
         ];
 
         this.paper.activate();
+
+        // Test
+        // this.image.url = "2023-06-20_19-23-07_01image.jpg"
 
         this.image.raster = new paper.Raster(this.image.url);
 
@@ -1050,6 +1092,7 @@
 
 
         this.image.raster.onLoad = () => {
+          this.state = "done"
           let width = this.image.raster.width;
           let height = this.image.raster.height;
           console.log('[AnnotatorView][initCanvas] - image_url : ' + this.image.url)
@@ -1087,6 +1130,10 @@
           this.text.topRight.content = width + "x" + height;
 
           this.loading.image = false;
+        };
+
+        this.image.raster.onerror = () => {
+          this.state = "ready"
         };
 
 
@@ -1481,7 +1528,43 @@
           this.selectFilter1(4)
         }
       },
+      'state'(newState) {
+        if(newState == 'done') {
+          if(this.activeTool == 'Brush') {
+            if (this.$refs.brush.brush.path == null) return;
 
+            let position = this.$refs.brush.brush.path.position;
+            this.$refs.brush.brush.path.remove();
+            this.$refs.brush.createBrush(position);
+          }
+          else if(this.activeTool == 'Eraser') {
+            if (this.$refs.eraser.eraser.brush == null) return;
+
+            let position = this.$refs.eraser.eraser.brush.position;
+            this.$refs.eraser.eraser.brush.remove();
+            this.$refs.eraser.createBrush(position);
+          }
+        }
+      },
+      'activeTool'(newTool) {
+        if(newTool == 'Select') {
+          this.$refs.select.click();
+        }
+        else if(this.activeTool == 'Brush') {
+          if (this.$refs.brush.brush.path == null) return;
+
+          let position = this.$refs.brush.brush.path.position;
+          this.$refs.brush.brush.path.remove();
+          this.$refs.brush.createBrush(position);
+        }
+        else if(this.activeTool == 'Eraser') {
+          if (this.$refs.eraser.eraser.brush == null) return;
+
+          let position = this.$refs.eraser.eraser.brush.position;
+          this.$refs.eraser.eraser.brush.remove();
+          this.$refs.eraser.createBrush(position);
+        }
+      },
 
       // "annotation"
       // doneLoading(done) {
@@ -1538,7 +1621,7 @@
       "cursor"() {
         console.log('[Watch]cursor : ', this.cursor)
       }
-      
+
 
 
 
