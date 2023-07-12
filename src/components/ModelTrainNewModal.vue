@@ -42,6 +42,7 @@
 
 <script>
 // import $ from 'jquery';
+import axios from "axios";
 
 export default{
    data() {
@@ -50,6 +51,8 @@ export default{
             model_name : "",
             model_script : "",
          },
+
+         API_List: null,
       }
    },
 
@@ -86,7 +89,7 @@ export default{
 
       post_create_model() {
          console.log(this.$store.state.account.User_ID)
-         fetch("http://183.105.120.175:30004/ai-model", {
+         fetch(this.API_List.create_model, {
          method: "POST",
          headers: {
             "Content-Type": "application/json",
@@ -106,7 +109,20 @@ export default{
          });
 
       },
+      set_APIlist() {
+         return axios.get('/api_list.json')
+         .then(response => {
+         this.API_List = response.data;
+         })
+         .catch(error => {
+         console.log(error);
+         });
+      },
    },
+
+   created() {
+      this.set_APIlist()
+   }
 
 }
 </script>

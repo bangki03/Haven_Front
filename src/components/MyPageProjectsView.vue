@@ -13,7 +13,7 @@
 
     <div class="my-container" style="display:flex; overflow-x: auto; width:100%; height:85%; flex-wrap: nowrap; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch;">
         <div v-for="(myProject) in this.myProjectList" :key="myProject" style="height:85%; padding: 0 0.5em; flex: 0 0 24%; scroll-snap-align : start">
-            <MyPageProjectsCard @click="click_ProjectCard(myProject)" :project_SummaryCard="myProject"/>
+            <MyPageProjectsCard :myProject="myProject"/>
         </div>
         <div style="height:85%; padding: 0 0.5em; flex: 0 0 24%;">
             <MyPageProjectsCreateCard @click="openModal" ref="mymodal" @blur="closeModal"></MyPageProjectsCreateCard>
@@ -41,6 +41,7 @@ import MyPageProjectsCreateCard from "@/components/MyPageProjectsCreateCard.vue"
 import MyPageProjectsCreateModal from "@/components/MyPageProjectsCreateModal.vue"
 
 import $ from 'jquery';
+import axios from "axios";
 
 export default {
     components: {
@@ -51,7 +52,9 @@ export default {
     data() {
         return {
             iscreateProjectOpen: false,
-            myProjectList: []
+            myProjectList: [],
+
+            API_List: null,
         }
     },
 
@@ -89,7 +92,7 @@ export default {
 
         get_ProjectList() {
             $.ajax({
-                url: "http://183.105.120.175:30004/project", // 클라이언트가 HTTP 요청을 보낼 서버의 URL 주소
+                url: this.API_List.get_projectlist, // 클라이언트가 HTTP 요청을 보낼 서버의 URL 주소
                 method: "GET",   // HTTP 요청 메소드(GET, POST 등)
                 dataType: "json", // 서버에서 보내줄 데이터의 타입
                 data: {
@@ -103,10 +106,21 @@ export default {
                 console.log(this.myProjectList)
             })
         },
-
+        set_APIlist() {
+            return axios.get('/api_list.json')
+            .then(response => {
+                this.API_List = response.data;
+            })
+            .catch(error => {
+                console.log(error);
+            });
+        },
     },
-    mounted() {
-        this.get_ProjectList()
+    created() {
+        this.set_APIlist()
+        .then(() => {
+            this.get_ProjectList()
+        })
     },
 }
 </script>

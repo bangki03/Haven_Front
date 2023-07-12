@@ -1,6 +1,6 @@
 <template>
-    <div id="preview" style="height: 100%; width: 100%;">
-        <div id="preview-header" style="">
+    <div id="preview" style="height: 100%; width: 100%;" @click="click_ProjectCard(myProject)">
+        <div id="preview-header">
             <div id="preview-header-top">
                 <div style="display:inline-flex; flex-direction: row;">
                     <img
@@ -9,29 +9,29 @@
                     alt="../assets/Project_Preview_Icon.png"
                     style="height: 25px; width: 25px; padding: 0; margin-right:auto;"
                     />
-                    <div style="margin: 0; color:white"> {{ project_SummaryCard.project_type }}</div>
+                    <div style="margin: 0; color:white"> {{ myProject.project_type }}</div>
                 </div>
 
                 <div>
-                    사양결정
+                    <!-- 사양결정 -->
                 </div>
                 <div>
-                    사양결정
+                    <!-- 사양결정 -->
                 </div>
             </div>
 
-            <div id="preview-header-middle">{{ project_SummaryCard.project_name }}</div>
+            <div id="preview-header-middle">{{ myProject.project_name }}</div>
             <div id="preview-header-bottom">
-                <div>
-                    {{ project_SummaryCard.factory_name }}
-                </div>
+                <i class="fa-solid fa-pen" style="margin-left:0.2rem; font-size:1.0rem; cursor: pointer;" @click.stop="openEditModal"></i>
+                <i class="fa-solid fa-trash" style="margin-left:0.5rem; font-size:1.0rem; cursor: pointer;" @click.stop="delete_project"></i>
+                <div style="margin-left:auto; margin-right:0.2rem;">{{ myProject.factory_name }}</div>
             </div>
-            
+
         </div>
         <div class="row" style="height: 5%; width:100%; "></div>
         <div id="preview-footer" style="height: 35%; width:100%; margin:0;">
-            <p style="margin: 0 10% 1em 0; text-align: left; font-size: 1em;"> {{ project_SummaryCard.project_name }}</p>
-            <p style="margin: 0 10% 1em 0; text-align: left; font-size: 0.66em;"> {{ project_SummaryCard.project_script }}</p>
+            <p style="margin: 0 10% 1em 0; text-align: left; font-size: 1em;"> {{ myProject.project_name }}</p>
+            <p style="margin: 0 10% 1em 0; text-align: left; font-size: 0.66em;"> {{ myProject.project_script }}</p>
         </div>
 
 
@@ -44,7 +44,7 @@
                 alt="../assets/Project_Preview_Icon.png"
                 style="height: 25px; width: 25px; padding: 0; margin-right:auto;"
                 />
-                <div style="margin: 0;"> {{ project_SummaryCard.project_type }}</div>
+                <div style="margin: 0;"> {{ myProject.project_type }}</div>
             </div>
 
             <div>
@@ -56,31 +56,50 @@
 
 
 
-            <p style="margin: 0;"> [project_type] : {{ project_SummaryCard.project_type }}</p>
+            <p style="margin: 0;"> [project_type] : {{ myProject.project_type }}</p>
 
 
-            <p style="margin: 0;"> [project_name] : {{ project_SummaryCard.project_name }}</p>
+            <p style="margin: 0;"> [project_name] : {{ myProject.project_name }}</p>
 
-            <p style="margin: 0;"> [factory_name] : {{ project_SummaryCard.factory_name }}</p>
-            <p style="margin: 0;"> [product_name] : {{ project_SummaryCard.product_name }}</p>
-            <p style="margin: 0;"> [process_name] : {{ project_SummaryCard.process_name }}</p>
+            <p style="margin: 0;"> [factory_name] : {{ myProject.factory_name }}</p>
+            <p style="margin: 0;"> [product_name] : {{ myProject.product_name }}</p>
+            <p style="margin: 0;"> [process_name] : {{ myProject.process_name }}</p>
         </div>
         <div class="row" style="height: 5%; width:100%; "></div>
         <div class="row" style="height: 35%; width:100%; margin:0; border: 1px solid black;">
-            <p style="margin: 0; text-align: left;"> [project_name] : {{ project_SummaryCard.project_name }}</p>
-            <p style="margin: 0; text-align: left;"> {{ project_SummaryCard.project_script }}</p>
+            <p style="margin: 0; text-align: left;"> [project_name] : {{ myProject.project_name }}</p>
+            <p style="margin: 0; text-align: left;"> {{ myProject.project_script }}</p>
         </div> -->
 
     </div>
+
+    <MyPageProjectsEditModal v-if="isEditProjectOpen" :myProject="myProject" @closeModal="closeModal"></MyPageProjectsEditModal>
 </template>
 
 <script>
+import axios from "axios";
+
+import MyPageProjectsEditModal from '@/components/MyPageProjectsEditModal.vue'
 
 export default{
-    props: ['project_SummaryCard'],
+    components: {MyPageProjectsEditModal},
+    props: ['myProject'],
+    data() {
+        return {
+            isEditProjectOpen: false,
+            API_List: null,
+        }
+    },
     methods: {
-        ClickButtonDelete() {
-            fetch("http://183.105.120.175:30004/project/" + this.project_SummaryCard.project_id, {
+        click_ProjectCard(myProject) {
+            console.log(myProject)
+            this.$store.commit("setProject", myProject)
+            this.$store.commit("saveSessionStorageProject")
+            this.$router.push('/project/annotate')
+        },
+
+        delete_project() {
+            fetch(this.API_List.delete_project + this.myProject.id, {
                 method: "DELETE",
                 headers: {
                     "Content-Type": "application/json",
@@ -99,21 +118,45 @@ export default{
             })
             ;
         },
+
+        openEditModal() {
+            this.isEditProjectOpen = true;
+            console.log("OpenModal")
+        },
+        closeModal(){
+            this.isEditProjectOpen = false;
+            console.log("CloseModal")
+        },
+        edit_project() {
+
+        },
+        set_APIlist() {
+            return axios.get('/api_list.json')
+            .then(response => {
+                this.API_List = response.data;
+            })
+            .catch(error => {
+                console.log(error);
+            });
+        },
+    },
+    created() {
+        this.set_APIlist()
     }
 }
 </script>
 
 <style>
 #preview-header {
-    display:flex; 
-    flex-direction: column; 
-    justify-content: space-between;  
-    
-    height: 60%; 
-    width:100%; 
-    margin:0; 
-    padding: 0.75em 0.5em 0.5em 0.5em; 
-    
+    display:flex;
+    flex-direction: column;
+    justify-content: space-between;
+
+    height: 60%;
+    width:100%;
+    margin:0;
+    padding: 0.75em 0.5em 0.5em 0.5em;
+
     border-radius: 0.5em;
 
     background: linear-gradient( to bottom, #151928, #313760);

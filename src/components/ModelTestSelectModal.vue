@@ -29,6 +29,7 @@
 
 <script>
 import $ from 'jquery';
+import axios from "axios";
 import ModelTestSelectModelHeader from '@/components/ModelTestSelectModelHeader.vue'
 import ModelTestSelectModelCard from '@/components/ModelTestSelectModelCard.vue'
 // import { ref } from "vue";
@@ -40,6 +41,7 @@ export default{
     },
     data() {
         return {
+            API_List: null,
             modelList: [],
             currentPage: 1,
             size: 10,
@@ -58,7 +60,7 @@ export default{
         },
         load_modellist() {
             $.ajax({
-                url: "http://183.105.120.175:30004/ai-model", // 클라이언트가 HTTP 요청을 보낼 서버의 URL 주소
+                url: this.API_List.get_modellist, // 클라이언트가 HTTP 요청을 보낼 서버의 URL 주소
                 method: "GET",   // HTTP 요청 메소드(GET, POST 등)
                 dataType: "json", // 서버에서 보내줄 데이터의 타입
                 data: {
@@ -107,7 +109,7 @@ export default{
         },
         load_model_deployed() {
             $.ajax({
-                url: "http://183.105.120.175:30004/ai-model/deployed", // 클라이언트가 HTTP 요청을 보낼 서버의 URL 주소
+                url: this.API_List.get_model_deployed, // 클라이언트가 HTTP 요청을 보낼 서버의 URL 주소
                 method: "GET",   // HTTP 요청 메소드(GET, POST 등)
                 dataType: "json", // 서버에서 보내줄 데이터의 타입
                 data: {
@@ -123,7 +125,7 @@ export default{
         },
         load_model(id) {
             $.ajax({
-                url: "http://183.105.120.175:30004/ai-model/deployed", // 클라이언트가 HTTP 요청을 보낼 서버의 URL 주소
+                url: this.API_List.get_model_deployed, // 클라이언트가 HTTP 요청을 보낼 서버의 URL 주소
                 method: "GET",   // HTTP 요청 메소드(GET, POST 등)
                 dataType: "json", // 서버에서 보내줄 데이터의 타입
                 data: {
@@ -157,11 +159,25 @@ export default{
             this.$emit("setModel", this.selected_model)
             this.$emit('closeModal')
         },
+        set_APIlist() {
+            return axios.get('/api_list.json')
+            .then(response => {
+                this.API_List = response.data;
+            })
+            .catch(error => {
+                console.log(error);
+            });
+        },
+
     },
 
-    mounted() {
-        this.load_modellist()
-    },
+    created() {
+        this.set_APIlist()
+        .then(() => {
+            this.load_modellist()
+        })
+    }
+
 }
 
 </script>

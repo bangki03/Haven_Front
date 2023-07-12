@@ -27,7 +27,7 @@
                     <p class="column-header">신규 학습 가능 NG 데이터 수</p>
                     <p style="font-family: Poppins-SemiBold; font-size:1.5rem; margin-bottom:0;">{{ model_deployed.ng_data_count }}</p>
                 </div>
-                <div id="btn-deploy" style="margin-left: auto; margin-right: 3.0em;" @click="openModal" ref="mymodal" @blur="closeModal">
+                <div id="btn-deploy" :class="{'btn-disable': flag_IntervalAPILoadData}" style="margin-left: auto; margin-right: 3.0em;" @click="openModal" ref="mymodal" @blur="closeModal">
                     신규 모델 학습
                 </div>
             </div>
@@ -62,6 +62,8 @@
 
 <script>
 import $ from 'jquery';
+import axios from "axios";
+
 import ModelTrainModelInfoHeader from '@/components/ModelTrainModelInfoHeader.vue'
 import ModelTrainModelInfoCard from '@/components/ModelTrainModelInfoCard.vue'
 import ModelTrainNewModal from '@/components/ModelTrainNewModal.vue'
@@ -75,6 +77,9 @@ export default{
     },
     data() {
         return {
+
+            API_List: null,
+
             isModelTrainNewOpen : false,
 
             modelList: [],
@@ -121,7 +126,7 @@ export default{
         },
         load_modellist() {
             $.ajax({
-                url: "http://183.105.120.175:30004/ai-model", // 클라이언트가 HTTP 요청을 보낼 서버의 URL 주소
+                url: this.API_List.get_modellist, // 클라이언트가 HTTP 요청을 보낼 서버의 URL 주소
                 method: "GET",   // HTTP 요청 메소드(GET, POST 등)
                 dataType: "json", // 서버에서 보내줄 데이터의 타입
                 data: {
@@ -184,7 +189,7 @@ export default{
         },
         load_model_deployed() {
             $.ajax({
-                url: "http://183.105.120.175:30004/ai-model/deployed/" + this.$store.state.project.id, // 클라이언트가 HTTP 요청을 보낼 서버의 URL 주소
+                url: this.API_List.get_model_deployed + this.$store.state.project.id, // 클라이언트가 HTTP 요청을 보낼 서버의 URL 주소
                 method: "GET",   // HTTP 요청 메소드(GET, POST 등)
                 dataType: "json", // 서버에서 보내줄 데이터의 타입
                 // data: {
@@ -217,15 +222,25 @@ export default{
             this.currentPage = page
             this.load_modellist()
         },
+        set_APIlist() {
+            return axios.get('/api_list.json')
+            .then(response => {
+                this.API_List = response.data;
+            })
+            .catch(error => {
+                console.log(error);
+            });
+        },
     },
     created() {
         this.$emit("emit_selectedMenu", 1)
+        this.set_APIlist().
+        then(() => {
+            this.load_model_deployed()
+            this.load_modellist()
+        })
     },
 
-    mounted() {
-        this.load_model_deployed()
-        this.load_modellist()
-    },
     beforeUnmount() {
         this.Clear_Interval_LoadData()
     }
@@ -280,6 +295,11 @@ export default{
 
   font-family:'NotoSansKR-Light';
   font-weight: bold;
+}
+
+.btn-disable {
+    color: #898989 !important;
+    pointer-events: none;
 }
 
 .pagination-container {

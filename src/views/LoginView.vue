@@ -10,27 +10,30 @@
         style="height: 58.9px; width: 176px; padding: 0;"
       />
       <p style="margin-left: auto; margin-right:0.5em; height: 1.5rem; margin-bottom: 0; cursor: pointer;" @mouseenter="showrevision = true" @mouseleave="showrevision = false">
-        Version : A.09 / Relase Date : 23.07.09 23:30</p>
+        Version : A.10 / Relase Date : 23.07.13 02:30</p>
       <div v-if=showrevision class="revision">
         <br>
-        Version : A.09<br>
-        Relase Date : 23.07.09 23:30 <br>
+        Version : A.10<br>
+        Relase Date : 23.07.13 02:30 <br>
         <br>
-        [LoginView]<br>
-        - 버전명 마우스 올릴 시, 변경사항 표시 기능 추가<br>
+        - API config 파일 생성<br>
+        <br>
+        [MyPageView]<br>
+        - 프로젝트 수정/삭제 기능 추가<br>
         <br>
         [AnnotatorView]<br>
-        - Brush / Eraser 최대 사이즈 수정 (200 → 20)<br>
-        - Brush 크키 Ctrl + wheel 조절 기능 추가<br>
-        - Eraser 크키 Ctrl + wheel 조절 기능 추가<br>
-        - Shortcut 추가<br>
-          . m : select Tool<br>
-          . b : brush Tool<br>
-          . e : eraser Tool<br>
-          . s : save<br>
-          . ctrl + z : undo<br>
-        - Preview 파일명 수정<br>
-        - Brush / Eraser 사라지는 버그 수정<br>
+        - Brush 도구 simplify(false) 적용<br>
+        - 저장 시, 팝업 알림창 삭제<br>
+        - 저장 시, 데이터 재조회<br>
+        <br>
+        [TrainView]<br>
+        - 모델 학습 중, 신규모델학습 버튼 비활성화<br>
+        <br>
+        [TestView]<br>
+        - 검증 요청 시, 전송하는 이미지 정보 변경<br>
+          (기존: 파일명, 변경: 파일명 + base64인코딩된 데이터)<br>
+        - 두번째 모델 legend Color 변경 (초록 → 피링)<br>
+        - "뒤로가기" 마우스 커서 변경 (none -> pointer)<br>
         <br>
       </div>
     </div>

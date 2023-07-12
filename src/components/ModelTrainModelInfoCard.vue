@@ -36,6 +36,8 @@
 </template>
 
 <script>
+import axios from "axios";
+
 export default{
     props: {
         modelInfo: {
@@ -55,6 +57,7 @@ export default{
     },
     data() {
         return{
+            API_List: null,
             train_progress_rate_fixed: "",
             val_score_fixed: "",
 
@@ -75,7 +78,7 @@ export default{
     },
     methods: {
         ClickButtonDeploy() {
-            fetch("http://183.105.120.175:30004/ai-model/" + this.modelInfo.id + "/deploy", {
+            fetch(this.API_List.deploy_model + this.modelInfo.id + "/deploy", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -92,7 +95,7 @@ export default{
                 });
         },
         ClickButtonDelete() {
-            fetch("http://183.105.120.175:30004/ai-model/" + this.modelInfo.id, {
+            fetch(this.API_List.delete_model + this.modelInfo.id, {
                 method: "DELETE",
                 headers: {
                     "Content-Type": "application/json",
@@ -119,7 +122,7 @@ export default{
             });
         },
         ClickButtonStop() {
-            fetch("http://183.105.120.175:30004/ai-model/stop-train/" + this.modelInfo.id, {
+            fetch(this.API_List.stop_train_model + this.modelInfo.id, {
                 method: "POSt",
                 headers: {
                     "Content-Type": "application/json",
@@ -157,6 +160,15 @@ export default{
                 this.val_score_fixed = (this.modelInfo.val_score * 100).toFixed(2) + "%"
             }
         },
+        set_APIlist() {
+            return axios.get('/api_list.json')
+            .then(response => {
+                this.API_List = response.data;
+            })
+            .catch(error => {
+                console.log(error);
+            });
+        },
     },
     watch: {
         'modelInfo.train_progress_rate'() {
@@ -169,6 +181,7 @@ export default{
         },
     },
     created() {
+        this.set_APIlist()
         this.set_train_progress_rate()
         this.set_val_score()
     }

@@ -2,37 +2,32 @@
    <div class="mymodal-wrapper" @click="close_modal()">
       <div class="mymodal" @click.stop="do_nothing()">
          <div class="modal-contents">
-            <div class="mymodal-header">프로젝트 생성</div>
+            <div class="mymodal-header">프로젝트 수정</div>
 
             <div class="mymodal-main">
                <div class="item-key">프로젝트 이름</div>
                <div class="item-value">
-                  <!-- <input v-model="project_info.project_name" class="form-control" placeholder="제품+검사+공정" required> -->
-                  <input id="input_project_name" :value="project_info.project_name" @input="project_info.project_name = $event.target.value" @blur="saveInputValue" class="form-control" placeholder="제품+검사+공정" required>
+                  <input id="input_project_name" :value="project_info.project_name" @input="project_info.project_name = $event.target.value" @blur="saveInputValue" class="form-control" :placeholder="myProject.project_name" required>
                </div>
 
                <div class="item-key">공장</div>
                <div class="item-value">
-                  <!-- <input v-model="project_info.factory_name" class="form-control" placeholder="공장명" required> -->
-                  <input id="input_factory_name" :value="project_info.factory_name" @input="project_info.factory_name = $event.target.value" @blur="saveInputValue" class="form-control" placeholder="공장명" required>
+                  <input id="input_factory_name" :value="project_info.factory_name" @input="project_info.factory_name = $event.target.value" @blur="saveInputValue" class="form-control" :placeholder="myProject.factory_name" required>
                </div>
 
                <div class="item-key">제품</div>
                <div class="item-value">
-                  <!-- <input v-model="project_info.product_name" class="form-control" placeholder="제품명" required> -->
-                  <input id="input_product_name" :value="project_info.product_name" @input="project_info.product_name = $event.target.value" @blur="saveInputValue" class="form-control" placeholder="제품명" required>
+                  <input id="input_product_name" :value="project_info.product_name" @input="project_info.product_name = $event.target.value" @blur="saveInputValue" class="form-control" :placeholder="myProject.product_name" required>
                </div>
 
                <div class="item-key">검사</div>
                <div class="item-value">
-                  <!-- <input v-model="project_info.process_name" class="form-control" placeholder="검사명" required> -->
-                  <input id="input_process_name" :value="project_info.process_name" @input="project_info.process_name = $event.target.value" @blur="saveInputValue" class="form-control" placeholder="검사명" required>
+                  <input id="input_process_name" :value="project_info.process_name" @input="project_info.process_name = $event.target.value" @blur="saveInputValue" class="form-control" :placeholder="myProject.process_name" required>
                </div>
 
                <div class="item-key">공정</div>
                <div class="item-value">
-                  <!-- <input v-model="project_info.operation_name" class="form-control" placeholder="공정명" required> -->
-                  <input id="input_operation_name" :value="project_info.operation_name" @input="project_info.operation_name = $event.target.value" @blur="saveInputValue" class="form-control" placeholder="공정명" required>
+                  <input id="input_operation_name" :value="project_info.operation_name" @input="project_info.operation_name = $event.target.value" @blur="saveInputValue" class="form-control" :placeholder="myProject.operation_name" required>
                </div>
 
                <div class="item-key">프로젝트 타입</div>
@@ -49,18 +44,17 @@
 
                <div class="item-key">설명</div>
                <div class="item-value" style="grid-row: 8 / span 2; grid-column: 1 / span 2; display:flex; align-items: stretch; justify-items: stretch;">
-                  <textarea v-model="project_info.project_script" style="width: 100%; height:8em; line-height:1.5em; border-radius: 20px; padding: 0.2em 1em;"></textarea>
-                  <!-- <input v-model="project_info.project_script" type="text" style="width: 100%; height:4em; line-height:4em; border-radius: 20px;"> -->
+                  <textarea v-model="project_info.project_script" :placeholder="myProject.project_script" style="width: 100%; height:8em; line-height:1.5em; border-radius: 20px; padding: 0.2em 1em;"></textarea>
                </div>
             </div>
 
             <div class="mymodal-footer">
-               <input type="submit" class="btn" value="생성하기" style="background-color: #BD7C4A; color:white; font-size: 2em; padding:0.1em 1em;" @click="handle_toggle">
+               <input type="submit" class="btn" value="수정하기" style="background-color: #BD7C4A; color:white; font-size: 2em; padding:0.1em 1em;" @click="handle_toggle">
             </div>
 
          </div>
 
-    </div>
+      </div>
 
    </div>
 
@@ -70,7 +64,20 @@
 import $ from 'jquery';
 import axios from "axios";
 
+
 export default{
+   props: {
+      myProject: {
+         create_time: String, // "2023-07-12T15:07:33"
+         factory_name: String, // "string"
+         id: Number,
+         process_name: String,
+         product_name: String,
+         project_name: String,
+         project_script: String,
+         project_type: String,
+      }
+   },
    data() {
       return {
          showDropdownContent: false,
@@ -118,7 +125,7 @@ export default{
          }
       },
       handle_toggle() {
-         this.post_register_project()
+         this.patch_edit_project()
 
       },
 
@@ -154,15 +161,14 @@ export default{
 
       },
 
-      post_register_project() {
+      patch_edit_project() {
          console.log(this.$store.state.account.User_ID)
-         fetch(this.API_List.create_project, {
-         method: "POST",
+         fetch(this.API_List.update_project + this.myProject.id, {
+         method: "PATCH",
          headers: {
             "Content-Type": "application/json",
          },
          body: JSON.stringify({
-            user_id: this.$store.state.account.UserID,
             project_name : this.project_info.project_name,
             product_name : this.project_info.product_name,
             process_name : this.project_info.process_name,
@@ -173,12 +179,16 @@ export default{
          }),
          }).then( data => {
          if(data.status == '200'){
-            alert("신규 프로젝트 생성되었습니다.");
+            alert("프로젝트 수정 완료.");
             this.$emit('closeModal')
             this.$router.go();
          }
          });
 
+      },
+      setInfo() {
+         this.project_info = this.myProject
+         this.selectProjectType(this.myProject.project_type)
       },
       set_APIlist() {
          return axios.get('/api_list.json')
@@ -192,6 +202,7 @@ export default{
    },
    created() {
       this.set_APIlist()
+      this.setInfo()
    },
    mounted() {
       document.addEventListener("click", this.handleOutsideClick);

@@ -40,6 +40,7 @@
 
 <script>
 import $ from 'jquery';
+import axios from "axios";
 
 export default{
   props: ['account'],
@@ -58,7 +59,8 @@ export default{
         Password_confirm : "",
         PhoneNumber : "",
       },
-      emptyFields: false
+      emptyFields: false,
+      API_List: null,
     }
   },
   computed: {
@@ -119,7 +121,7 @@ export default{
     //  API 내놔~
     get_Login() {
       $.ajax({
-          url: "http://183.105.120.175:30004/user/login", // 클라이언트가 HTTP 요청을 보낼 서버의 URL 주소
+          url: this.API_List.get_login, // 클라이언트가 HTTP 요청을 보낼 서버의 URL 주소
           method: "GET",   // HTTP 요청 메소드(GET, POST 등)
           dataType: "json", // 서버에서 보내줄 데이터의 타입
           data: {
@@ -140,7 +142,7 @@ export default{
 
     get_UserID() {
       $.ajax({
-          url: "http://183.105.120.175:30004/user", // 클라이언트가 HTTP 요청을 보낼 서버의 URL 주소
+          url: this.API_List.get_user, // 클라이언트가 HTTP 요청을 보낼 서버의 URL 주소
           method: "GET",   // HTTP 요청 메소드(GET, POST 등)
           dataType: "json", // 서버에서 보내줄 데이터의 타입
           data: {
@@ -158,7 +160,7 @@ export default{
 
 
     post_register_account() {
-      fetch("http://183.105.120.175:30004/user", {
+      fetch(this.API_List.create_user, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -210,8 +212,22 @@ export default{
     //   })
     // },
 
+    set_APIlist() {
+      return axios.get('/api_list.json')
+      .then(response => {
+        this.API_List = response.data;
+      })
+      .catch(error => {
+        console.log(error);
+      });
+    },
 
+  },
+
+  created() {
+    this.set_APIlist()
   }
+
 }
 </script>
 

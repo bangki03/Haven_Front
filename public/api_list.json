@@ -2,5 +2,26 @@
     "annotator_save": "http://183.105.120.175:30006/annotation/",
     "annotator_load": "http://183.105.120.175:30006/annotation",
     "stream_evaluate_image": "http://183.105.120.175:30007/eval/stream/triton/tensorrt/",
-    "eval_web_socket": "ws://183.105.120.175:30007/eval/web_socket"
+    "eval_web_socket": "ws://183.105.120.175:30007/eval/web_socket",
+
+    "get_login": "http://183.105.120.175:30004/user/login",
+    "get_user": "http://183.105.120.175:30004/user",
+    "create_user": "http://183.105.120.175:30004/user",
+
+    "get_projectlist": "http://183.105.120.175:30004/project/",
+    "delete_project": "http://183.105.120.175:30004/project/",
+    "create_project": "http://183.105.120.175:30004/project/",
+    "update_project": "http://183.105.120.175:30004/project/",
+
+    "get_modellist": "http://183.105.120.175:30004/ai-model/",
+    "get_model_deployed": "http://183.105.120.175:30004/ai-model/deployed/",
+    "create_model": "http://183.105.120.175:30004/ai-model",
+    "delete_model": "http://183.105.120.175:30004/ai-model/",
+    "deploy_model": "http://183.105.120.175:30004/ai-model/",
+    "stop_train_model": "http://183.105.120.175:30004/ai-model/stop-train/",
+
+
+    "get_datalist": "http://183.105.120.175:30004/data"
+
+    
 }

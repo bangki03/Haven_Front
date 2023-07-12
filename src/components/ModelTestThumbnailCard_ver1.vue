@@ -1,4 +1,4 @@
-<!-- ModelTestZoomModal_ver3 랑 매칭. 이미지를 binary data로 직접 만든다. -->
+<!-- ModelTestZoomModal_ver2 랑 매칭. 이미지 경로를 가지고 이미지를 불러오는 버전 -->
 <template>
     <div style="height: 100%; display:flex; flex-direction: row; align-items: center; justify-content: center;">
         <div v-show="state_loading" style="height: 100%; display:flex; flex-direction: column; justify-content: center;">
@@ -35,11 +35,11 @@ export default{
 
         // InferenceData: [
             //     {
-            //         'image_binary': "AAAAA....",
-            //         'base64_encoded': "AAAAA...."
+            //         'image_path_raw': "/iQ.Platform/projects/1/data/2023-06-16/16-19-41/2023-06-16_16-19-41_01image.jpg",
             //         "result": "OK",
             //         "uncertainty": 0,
-            //         "image_path1": "2023-06-16_16-19-41_01image.jpg",
+            //         "image_path1": "2023-06-16/16-19-41/2023-06-16_16-19-41_01image.jpg",
+            //         "image_path2": "",
             //         "mask" : [
             //             {id: "175", name: "175", data_base64Decoded: []},
             //             {id: "176", name: "176", data_base64Decoded: []},
@@ -71,8 +71,10 @@ export default{
             return new Promise((resolve, reject) => {
                 const img = new Image();
                 img.onload = () => {
-                    canvas.width = this.imageSize.width;
-                    canvas.height = this.imageSize.height;
+                    this.imageSize.width = img.width
+                    this.imageSize.height = img.height
+                    canvas.width = img.width;
+                    canvas.height = img.height;
                     const ctx = canvas.getContext("2d");
                     ctx.drawImage(img, 0, 0);
 
@@ -86,13 +88,14 @@ export default{
                         imgElement.src = canvas.toDataURL();
                         resolve();
                     };
-                    mask1.src = this.mask2png(this.inferenceInfo.mask[0].data_base64Decoded, this.ColorHEX2RGB(this.colorList[0]))
+                    mask1.src = this.binary2png(this.inferenceInfo.mask[0].data_base64Decoded, this.ColorHEX2RGB(this.colorList[0]))
                 };
                 img.onerror = () => {
                     reject(new Error("Failed to load image."));
                 };
-                img.src = 'data:image/jpeg;base64,' + this.inferenceInfo.base64_encoded
-
+                img.src = this.inferenceInfo.image_path2;
+                // console.log("img.src")
+                // console.log(img.src)
             });
         },
         // 이미지 로드 및 마스크 그리기 함수 (임시 마스크 2개)
@@ -105,8 +108,10 @@ export default{
             return new Promise((resolve, reject) => {
                 const img = new Image();
                 img.onload = () => {
-                    canvas.width = this.imageSize.width;
-                    canvas.height = this.imageSize.height;
+                    this.imageSize.width = img.width
+                    this.imageSize.height = img.height
+                    canvas.width = img.width;
+                    canvas.height = img.height;
                     const ctx = canvas.getContext("2d");
                     ctx.drawImage(img, 0, 0);
 
@@ -125,61 +130,22 @@ export default{
                             imgElement.src = canvas.toDataURL();
                             resolve();
                         };
-                        mask2.src = this.mask2png(this.inferenceInfo.mask[1].data_base64Decoded, this.ColorHEX2RGB(this.colorList[1]))
+                        mask2.src = this.binary2png(this.inferenceInfo.mask[1].data_base64Decoded, this.ColorHEX2RGB(this.colorList[1]))
                     };
-                    mask1.src = this.mask2png(this.inferenceInfo.mask[0].data_base64Decoded, this.ColorHEX2RGB(this.colorList[0]))
+                    mask1.src = this.binary2png(this.inferenceInfo.mask[0].data_base64Decoded, this.ColorHEX2RGB(this.colorList[0]))
                 };
                 img.onerror = () => {
                     reject(new Error("Failed to load image."));
                 };
-                img.src = 'data:image/jpeg;base64,' + this.inferenceInfo.base64_encoded
+                img.src = this.inferenceInfo.image_path2;
             });
         },
-        binaryimg2png(data_binary, color_ref){
+        binary2png(data_binary, color_ref){
             // 캔버스 생성
             const canvas = document.createElement('canvas');
             canvas.width = this.imageSize.width;
             canvas.height= this.imageSize.height;
 
-            console.log("this.imageSize.width: ", this.imageSize.width)
-            console.log("this.imageSize.height: ", this.imageSize.height)
-            // 캔버스 컨텍스트 설정
-            const context = canvas.getContext('2d');
-
-            // 픽셀값 데이터를 이용하여 이미지 생성
-            const imageData = context.createImageData(this.imageSize.width, this.imageSize.height);
-            // const imageData = context.createImageData(1024, 1024);
-            const data = imageData.data;    // data : 가로 x 세로 x 4ch Array
-
-            const transparency = [0, 0, 0, 0];
-
-            for (let i = 0; i < data.length; i += 4) {
-                const index = i / 4;
-                const color = data_binary[index] === '1' ? color_ref : transparency;
-                // if(data_binary[index] === '1') {
-                //     console.log("defect")
-                // }
-
-                data[i] = color[0];
-                data[i + 1] = color[1];
-                data[i + 2] = color[2];
-                data[i + 3] = color[3];
-            }
-
-            // 이미지 데이터 추출
-            context.putImageData(imageData, 0, 0);
-            const image = canvas.toDataURL('image/png');
-
-            return image
-        },
-        mask2png(data_binary, color_ref){
-            // 캔버스 생성
-            const canvas = document.createElement('canvas');
-            canvas.width = this.imageSize.width;
-            canvas.height= this.imageSize.height;
-
-            console.log("this.imageSize.width: ", this.imageSize.width)
-            console.log("this.imageSize.height: ", this.imageSize.height)
             // 캔버스 컨텍스트 설정
             const context = canvas.getContext('2d');
 
@@ -223,8 +189,6 @@ export default{
         },
     },
     created() {
-        this.imageSize.width = this.inferenceInfo.width
-        this.imageSize.height = this.inferenceInfo.height
 
     },
     mounted() {

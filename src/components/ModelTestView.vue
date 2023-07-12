@@ -27,7 +27,7 @@
 
             <progress id="progress" :value="this.progress_rate" min="0" :max="ImageList.length" style="width: 10rem; margin-left: auto; margin-right: 1.0em;"></progress>
             <p  style="font-family: Poppins-SemiBold; font-size:1.0rem; margin-right: 1.0em; margin-top:auto; margin-bottom: auto;">{{ progress_rate }}/{{ ImageList.length }}</p>
-            <div id="btn-start-test" style="margin-right: 1.0em;" @click="strat_test"
+            <div id="btn-start-test" style="margin-right: 1.0em;" @click="start_test"
             :class="{'btn-active': ImageList.length > 0 && ModelList.length > 0 , 'btn-disable': ImageList.length == 0 || ModelList.length == 0}">
                 모델 검증 시작
             </div>
@@ -41,7 +41,7 @@
 
         <div class="dard-container" style="width:98%; height: 780px; display:flex; flex-direction: column; justify-content: flex-start; align-items: center; margin-top:1em;">
             <div class="dard-header" style="display:flex; flex-direction: row; justify-content:flex-start; align-items: center; " >
-                <div v-show="letFocusImage" id="btn-back" @click="CloseZoomImageModal" style="margin-left:1.0em;">
+                <div v-show="letFocusImage" id="btn-back" @click="CloseZoomImageModal" style="margin-left:1.0em; cursor: pointer;">
                     <i id="arrow-previous" class="fa fa-arrow-left image-arrows" style="font-size: 15px; transform: scaleX(1); color: white;"/> 뒤로가기
                 </div>
             </div>
@@ -199,6 +199,7 @@ export default{
     },
     data() {
         return{
+            API_List: null,
             // Modal 및 State
             letSelectModel: false,
             letFocusImage: false,
@@ -230,7 +231,7 @@ export default{
 
             // 검증 시작 Output
             InferenceData: [],
-            colorList: ['#FF0000', '#00FF00', '#0000FF'],
+            colorList: ['#FF0000', '#0000FF', '#FF00FF'],
 
             // 검증 시작 Output (Test)
             // InferenceData: [
@@ -281,7 +282,7 @@ export default{
             const imageInput = document.getElementById('imageInput');
             imageInput.click();
         },
-        handleFileInputChange(event) {
+        async handleFileInputChange(event) {
             const files = event.target.files;
             if (files.length === 0) {
                 console.log('파일 선택이 취소되었습니다.');
@@ -290,12 +291,22 @@ export default{
 
             this.ImageList = []
             for (var file of files){
-                console.log(file.value)
+                let data = await this.encode_base64(file)
+                let base64_encoded = data.base64Data
+                let raw_binary = data.binaryString
+                let image_size = await this.getSizeImage(file)
+
                 this.ImageList.push({
                     filename: file.name,
                     imagepath: this.set_origin_filepath(file.name),
+                    height: image_size.height,
+                    width: image_size.width,
+                    image_binary: raw_binary,
+                    base64_encoded: base64_encoded
                 })
             }
+
+
 
 
             // Test
@@ -320,7 +331,7 @@ export default{
         },
         load_modellist() {
             $.ajax({
-                url: "http://183.105.120.175:30004/ai-model", // 클라이언트가 HTTP 요청을 보낼 서버의 URL 주소
+                url: this.API_List.get_modellist, // 클라이언트가 HTTP 요청을 보낼 서버의 URL 주소
                 method: "GET",   // HTTP 요청 메소드(GET, POST 등)
                 dataType: "json", // 서버에서 보내줄 데이터의 타입
                 data: {
@@ -347,85 +358,19 @@ export default{
         },
 
         ////////// 검증 시작 요청 버튼 //////////
-        strat_test() {
+        start_test() {
             // this.setupEventSource()
             // this.setupSocket()
-            this.setupSocket2()
+            // this.setupSocket2()
+            this.setupSocket3()
             // this.state = "done"
         },
-        // SSE
-        setupEventSource() {
-            const eventSource = new EventSource(this.config.stream_evaluate_image + this.$store.state.project.id); // 서버의 SSE 엔드포인트로 연결합니다.
-
-            eventSource.onopen = (event) => {
-                console.log('SSE 연결이 열렸습니다.');
-                console.log(event)
-            };
-
-            eventSource.onmessage = (event) => {
-                console.log("ahah")
-                var validJSONstring = event.data.replace(/'/g, '"');
-                const data = JSON.parse(validJSONstring); // 받은 데이터를 JSON 형태로 파싱합니다.
-                this.update_section(data);
-            };
-
-            eventSource.onerror = (event) => {
-                console.error('SSE 연결 중 오류가 발생했습니다.');
-                console.log(event)
-                eventSource.close(); // 오류 발생 시 SSE 연결을 종료합니다.
-            };
-        },
-
-        // Socket (Socket.io 사용)
-        // setupSocket() {
-        //     this.socket = io(this.config.eval_web_socket);
-
-        //     this.socket.on('connect', () => {
-        //         console.log("소켓 연결이 열렸습니다.")
-        //     })
-
-        //     // this.socket.on('data', (data) => {
-        //     //     // 데이터 처리 추가 필요
-        //     //     console.log(data)
-        //     //     // this.messages.push(data);
-        //     //     //
-        //     //     // data: {‘progress’: 1, ‘image_path’: ‘/iQ.Platform/projects/1/data/2023-06-11/23-38-35/2023-06-11_23-38-35_01.jpg’, ‘result’: ‘OK’, ‘uncertainty’: 0, ‘mask’: {‘175’:인코딩_value, ‘176’:인코딩_value}}
-        //     // });
-
-        //     this.socket.on('disconnect', () => {
-        //         console.log('소켓 연결이 닫혔습니다.');
-        //     });
-
-        //     this.socket.on('error', (error) => {
-        //         console.error('소켓 연결 중 오류가 발생했습니다:', error);
-        //     });
-        // },
-        // clearSocket() {
-        //     this.socket.disconnect();
-        //     console.log('소켓 연결이 닫혔습니다.');
-        // },
-        // sendMessage() {
-        //     // 임시
-        //     const req_body = {
-        //         'project_id': this.$store.state.project.id,
-        //         'image_files': [
-        //             '/iQ.Platform/projects/1/data/2023-06-16/16-19-41/2023-06-16_16-19-41_01image.jpg',
-        //             '/iQ.Platform/projects/1/data/2023-06-16/16-19-41/2023-06-16_16-19-41_01image.jpg',
-        //             '/iQ.Platform/projects/1/data/2023-06-16/16-19-41/2023-06-16_16-19-41_01image.jpg',
-        //             '/iQ.Platform/projects/1/data/2023-06-16/16-19-41/2023-06-16_16-19-41_01image.jpg',
-        //             '/iQ.Platform/projects/1/data/2023-06-16/16-19-41/2023-06-16_16-19-41_01image.jpg',
-        //             '/iQ.Platform/projects/1/data/2023-06-16/16-19-41/2023-06-16_16-19-41_01image.jpg',
-        //             '/iQ.Platform/projects/1/data/2023-06-16/16-19-41/2023-06-16_16-19-41_01image.jpg'],
-        //         'ai_model_ids':['177','177']
-        //     };
-        //     this.socket.emit(req_body);
-        // },
-
+        
         // Socket (WebSocket 사용)
         setupSocket2() {
             console.log("setupSocket2")
             // console.log(this.config.eval_web_socket)
-            this.socket = new WebSocket(this.config.eval_web_socket)
+            this.socket = new WebSocket(this.API_List.eval_web_socket)
             console.log("this.socket.readyState: ",this.socket.readyState)
 
             this.socket.onopen = () => {
@@ -561,6 +506,73 @@ export default{
                 // this.state="ready"
             };
 
+        },
+        // image를 서버에 직접 쏘는 메쏘드 (Data 입출력 변경함. 그 전에는 [] 였는데, Object로 )
+        setupSocket3() {
+            this.socket = new WebSocket(this.API_List.eval_web_socket)
+            console.log("this.socket.readyState: ",this.socket.readyState)
+
+            this.socket.onopen = () => {
+                this.state = "running"
+                console.log("소켓 연결이 열렸습니다.")
+                console.log("this.socket.readyState: ",this.socket.readyState)
+
+                let imageDataList = []
+                for(let i=0; i<this.ImageList.length; i++) {
+                    let imageData = {}
+                    imageData.file_name = this.ImageList[i].filename
+                    imageData.encoded_image = this.ImageList[i].base64_encoded
+                    imageData.width = this.ImageList[i].width
+                    imageData.height = this.ImageList[i].height
+
+                    imageDataList.push(imageData)
+                }
+
+                let aiModelList = []
+                for(let i=0; i<this.ModelList.length; i++) {
+                    let aiModel = {}
+                    aiModel.id = String(this.ModelList[i].id)
+                    aiModel.name = String(this.ModelList[i].name)
+                    aiModel.path = String(this.ModelList[i].file_path)
+
+                    aiModelList.push(aiModel)
+                }
+
+                var jsonData = {
+                    'project_id': this.$store.state.project.id,
+                    'images': imageDataList,
+                    'ai_models': aiModelList,
+                }
+
+                console.log("Socket onOpen <Send>")
+                console.log(JSON.stringify(jsonData))
+                this.socket.send(JSON.stringify(jsonData));
+            };
+
+            this.socket.onmessage = (event) => {
+                console.log(event)
+                var validJSONstring = event.data.replace(/'/g, '"');
+                const data = JSON.parse(validJSONstring); // 받은 데이터를 JSON 형태로 파싱합니다.
+                this.Parse_InferenceData_v2(data)   // 이미지를 직접 내가 만드는
+
+                if(this.InferenceData.length == this.ImageList.length) {
+                    this.state = "done"
+                    this.clearSocket()
+                    console.log(this.InferenceData)
+                }
+
+            };
+
+            this.socket.onerror = (error) => {
+                console.error('소켓 연결 중 오류가 발생했습니다:', error);
+            };
+
+            this.socket.onclose = (event) => {
+                console.log('소켓 연결이 닫혔습니다:', event.code);
+                // alert("서버와 소켓통신 끊어졌습니다. 확인 바랍니다.")
+                // this.state="ready"
+            };
+
             // console.log("setupSocket2 - 종료")
         },
         clearSocket() {
@@ -653,6 +665,59 @@ export default{
 
         },
 
+        // project 외 경로의 이미지에 대해서도 그려야하기 때문에,
+        Parse_InferenceData_v2(rawData) {
+            if(rawData != null && Object.prototype.hasOwnProperty.call(rawData, "progress")) {
+                this.progress_rate = rawData.progress
+                let output = {}
+
+                // 1. filename 확인
+                let status_image_matching = false
+                for(let index in this.ImageList) {
+                    if(this.ImageList[index].filename == rawData.filename) {
+                        output.image_binary = this.ImageList[index].image_binary
+                        output.base64_encoded = this.ImageList[index].base64_encoded
+                        output.width = this.ImageList[index].width
+                        output.height = this.ImageList[index].height
+                        // console.log("index: ", index)
+                        // console.log("filename: ", this.ImageList[index].filename)
+                        // console.log("image_binary: ")
+                        // console.log(this.ImageList[index].image_binary)
+                        status_image_matching = true;
+                        break;
+                    }
+                }
+                if(!status_image_matching) {
+                    alert("No image named []", rawData.filename)
+                    return
+                }
+
+                output.image_path1 = rawData.image_filename
+                console.log("binaryImage")
+                console.log(output.image_binary)
+
+                // test
+                // output.image_path2 = "/project/" + rawData.image_path.split('/')[7]
+
+                // 2. 기타 데이터 저장
+                output.result = rawData.result
+                output.uncertainty = rawData.uncertainty
+
+                // 3. mask 데이터 Decoding
+                output.mask=[]
+                for( let ModelNo in rawData.mask) {
+                    let mask_tmp = {}
+                    mask_tmp.id = ModelNo
+                    mask_tmp.name = ModelNo
+                    mask_tmp.data_base64 = rawData.mask[ModelNo]
+                    mask_tmp.data_base64Decoded = this.decode_base64(rawData.mask[ModelNo])
+                    output.mask.push(mask_tmp)
+                }
+                this.InferenceData.push(output)
+            }
+
+        },
+
         decode_base64(encodedData) {
             const decodedData = atob(encodedData);
 
@@ -662,6 +727,49 @@ export default{
             }
 
             return binaryData
+        },
+        encode_base64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => {
+                    console.log("ImageFile Onload")
+                    const fileData = reader.result; // fileData : Arraybuffer
+                    const uint8Array = new Uint8Array(fileData);    // unit8 Array
+
+                    let binaryString = '';
+                    for (let i = 0; i < uint8Array.length; i++) {
+                        binaryString += String.fromCharCode(uint8Array[i]);     // binaryString
+                    }
+                    const base64Data = btoa(binaryString);
+                    resolve({binaryString: binaryString, base64Data: base64Data});
+                };
+
+                reader.onerror = (error) => {
+                    reject(error)
+                };
+                reader.readAsArrayBuffer(file);
+            })
+        },
+        getSizeImage(file) {
+
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+
+                img.onload = function() {
+                    const width = img.width;
+                    const height = img.height;
+                    resolve({width: width, height: height})
+                };
+
+                img.onerror = (error) => {
+                    reject(error)
+                };
+
+                img.src = URL.createObjectURL(file);
+
+            })
+
+
         },
 
         ////////// 이미지 확대 모달 //////////
@@ -713,16 +821,16 @@ export default{
 
 
 
-        set_config() {
+        set_APIlist() {
             return axios.get('/api_list.json')
             .then(response => {
-                this.config = response.data;
-                console.log(this.config)
+                this.API_List = response.data;
             })
             .catch(error => {
                 console.log(error);
             });
         },
+
 
     },
     watch: {
@@ -733,7 +841,7 @@ export default{
         }
     },
     created(){
-        this.set_config()
+        this.set_APIlist()
         this.$emit("emit_selectedMenu", 2)
 
         if (Object.prototype.hasOwnProperty.call(this.$route.query, "id")) {

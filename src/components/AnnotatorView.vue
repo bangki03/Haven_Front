@@ -593,7 +593,7 @@
       load_data(){
 
         $.ajax({
-          url: "http://183.105.120.175:30004/data", // 클라이언트가 HTTP 요청을 보낼 서버의 URL 주소
+          url: this.API_List.get_datalist, // 클라이언트가 HTTP 요청을 보낼 서버의 URL 주소
           method: "GET",   // HTTP 요청 메소드(GET, POST 등)
           dataType: "json", // 서버에서 보내줄 데이터의 타입
           data: {
@@ -618,7 +618,7 @@
           }
 
           return $.ajax({
-            url: "http://183.105.120.175:30004/data", // 클라이언트가 HTTP 요청을 보낼 서버의 URL 주소
+            url: this.API_List.get_datalist, // 클라이언트가 HTTP 요청을 보낼 서버의 URL 주소
             method: "GET",   // HTTP 요청 메소드(GET, POST 등)
             dataType: "json", // 서버에서 보내줄 데이터의 타입
             data: {
@@ -889,10 +889,12 @@
 
       // Current Annotation Operations
       uniteCurrentAnnotation(compound, simplify = true, undoable = true, isBBox = false) {
+        simplify = false
         if (this.currentAnnotation == null) return;
         this.currentAnnotation.unite(compound, simplify, undoable, isBBox);
       },
       subtractCurrentAnnotation(compound, simplify = true, undoable = true) {
+        simplify = false
         if (this.currentCategory == null) return;
         this.currentAnnotation.subtract(compound, simplify, undoable);
       },
@@ -1043,7 +1045,7 @@
         this.paper.activate();
 
         // Test
-        // this.image.url = "2023-06-20_19-23-07_01image.jpg"
+        // this.image.url = "2023-07-09_17-49-11_04image.jpg"
 
         this.image.raster = new paper.Raster(this.image.url);
 
@@ -1360,8 +1362,12 @@
           .post(this.API_List.annotator_save, JSON.stringify(data))
           .then(() => {
             //TODO: updateUser
-            alert('saved!')
-            this.click_ThumbnailCard_by_Index(this.index_image.index_inTotalList + 1)
+            // alert('saved!')
+
+            // this.click_ThumbnailCard_by_Index(this.index_image.index_inTotalList + 1)
+
+            // 다시 재조회 하자.
+            this.load_data()
 
             if (callback != null) callback();
           })
@@ -1498,7 +1504,7 @@
 
       //////////////////////////////////// Test - API ////////////////////////////////////
       set_APIlist() {
-        axios.get('/api_list.json')
+        return axios.get('/api_list.json')
         .then(response => {
           this.API_List = response.data;
         })
