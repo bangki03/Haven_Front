@@ -23,6 +23,8 @@ export default{
     props: {
         inferenceInfo: {
             image_path_raw : String,
+            image_binary: String,
+            base64_encoded: String,
             result: String,
             uncertainty: Number,
             image_path1: String,    // 보여주기 위한 경로
@@ -92,7 +94,7 @@ export default{
                     reject(new Error("Failed to load image."));
                 };
                 img.src = 'data:image/jpeg;base64,' + this.inferenceInfo.base64_encoded
-
+                console.log(this.inferenceInfo.base64_encoded)
             });
         },
         // 이미지 로드 및 마스크 그리기 함수 (임시 마스크 2개)

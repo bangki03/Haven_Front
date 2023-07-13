@@ -4,6 +4,8 @@
     "stream_evaluate_image": "http://183.105.120.175:30007/eval/stream/triton/tensorrt/",
     "eval_web_socket": "ws://183.105.120.175:30007/eval/web_socket",
 
+    "monitoring_stop": "http://183.105.120.175:30007/application/stop/",
+
     "get_login": "http://183.105.120.175:30004/user/login",
     "get_user": "http://183.105.120.175:30004/user",
     "create_user": "http://183.105.120.175:30004/user",

@@ -1,4 +1,4 @@
-<!-- Mask 2개까지만 if else 문으로 정적으로 박아놓은 소스 / image binary 데이터를 이용해서 이미지 onload 시키는 버전-->
+<!-- Mask 2개까지만 if else 문으로 정적으로 박아놓은 소스 / image path(image.url) 를 이용해서 이미지 onload 시키는 버전-->
 <template>
     <div style="width:100%; display:flex; flex-direction: row; justify-content: flex-end; align-items: center;">
         <div v-for="(MaskInfo, index) in InferenceData.mask" :key="MaskInfo.ModelName">
@@ -32,12 +32,16 @@ export default{
     props: {
         InferenceData: {
             image_path_raw: String, // 원본 Path
+            image_binary: String,
+            base64_encoded: String,
             result: String,
             uncertainty: Number,
 
             image_path1: String,    // Front에 출력용
             image_path2: String,    // Load 용
             mask: Array,
+            width: Number,
+            height: Number,
         },
         colorList: Array,
 
@@ -105,7 +109,7 @@ export default{
     },
     methods: {
         assignSwitchList() {
-            this.switchList = Array(this.InferenceData.mask.length).fill(false);
+            this.switchList = Array(this.InferenceData.mask.length).fill(true);
         },
         initMaskInfo() {
             // for(let i=0; i<this.InferenceData.length; i++) {
@@ -133,55 +137,64 @@ export default{
         initCanvas() {
             let canvas = document.getElementById("editor");
             this.paper.setup(canvas);
-            this.canvasSize.width = canvas.offsetWidth
-            this.canvasSize.height = canvas.offsetHeight
-            this.paper.view.viewSize = [this.canvasSize.width, this.canvasSize.height];
+            this.paper.view.viewSize = [
+                // this.paper.view.size.width,
+                // window.innerWidth, window.innerHeight
 
-
-            let imageLayer = new this.paper.Layer(); // 이미지를 그릴 레이어
-            let mask1Layer = new this.paper.Layer(); // 마스크를 그릴 레이어
-
+                canvas.offsetWidth, canvas.offsetHeight
+            ];
 
             this.paper.activate();
-            this.image.raster = new Image();
+            // this.image.url = this.image_meta.imagepath_img
+            // console.log("this.image.url : " + this.image.url)
+            this.image.raster = new paper.Raster(this.image.url);
 
-            this.image.raster.onload = () => {
-                console.log("Image Onloaded")
-                imageLayer.addChild(this.image.raster);
-                this.image.raster.opacity = 1;
+            const maskImage1 = new Image();
+            maskImage1.src = this.mask1.url;
 
-                this.imageSize.width = this.image.raster.width;
-                this.imageSize.height = this.image.raster.height;
+            this.image.raster.onLoad = () => {
+                console.log('[initCanvas] - onloaded')
+                let tempCtx = document.createElement("canvas").getContext("2d");
+                let width = this.image.raster.width;
+                let height = this.image.raster.height;
 
+                tempCtx.canvas.width = width;
+                tempCtx.canvas.height = height;
 
-                // 마스크1 이미지 생성
-                const mask1Image = new Image();
+                this.image.raster.sendToBack();
+                this.fit();
+                this.image.ratio = (width * height) / 1000000;
+                // this.removeProcess(process);
 
-                mask1Image.onload = () => {
-                    console.log("Mask1 Onloaded")
-                    this.maskRaster[0] = new this.paper.Raster(mask1Image);
-                    this.maskRaster[0].opacity = 0;
+                tempCtx.drawImage(this.image.raster.image, 0, 0, width, height);
 
-                    mask1Layer.addChild(this.maskRaster[0]);
+                maskImage1.onLoad = () => {
+                    console.log('maskImage onload')
+                    tempCtx.globalAlpha = 0.9; // 투명도 조절 값 (0.0 ~ 1.0)
+                    tempCtx.drawImage(maskImage1, 0, 0, width, height);
+                }
 
-                    imageLayer.position = new this.paper.Point(0, 0);
-                    mask1Layer.position = new this.paper.Point(0, 0);
+                this.image.data = tempCtx.getImageData(0, 0, width, height);
+                let fontSize = width * 0.025;
 
-                    this.image.raster.sendToBack();
-                    this.maskRaster[0].sendToBack();
-                    this.fit();
-                    this.image.ratio = (this.imageSize.width * this.imageSize.height) / 1000000;
-                };
+                let positionTopLeft = new paper.Point(
+                    -width / 2,
+                    -height / 2 - fontSize * 0.5
+                );
+                this.text.topLeft = new paper.PointText(positionTopLeft);
+                this.text.topLeft.fontSize = fontSize;
+                this.text.topLeft.fillColor = "black";
+                this.text.topLeft.content = this.image.url;
 
-                const imageData = this.mask2png(this.InferenceData.image_binary, [0,0,0,0])
-                const mask1Data = this.mask2png(this.InferenceData.mask[0].data_base64Decoded, this.ColorHEX2RGB(this.colorList[0]))
-                // const mask2Data = this.mask2png(this.InferenceData.mask[1].data_base64Decoded, this.ColorHEX2RGB(this.colorList[1]))
-                // const mask3Data = this.mask2png(this.InferenceData.mask[2].data_base64Decoded, this.ColorHEX2RGB(this.colorList[2]))
-                mask1Image.src = imageData;
-                this.image.raster.src = mask1Data;
-                // mask2Image.src = mask2Data;
-                // mask3Image.src = mask3Data;
-
+                // let positionTopRight = new paper.Point(
+                //     width / 2,
+                //     -height / 2 - fontSize * 0.4
+                // );
+                // this.text.topRight = new paper.PointText(positionTopRight);
+                // this.text.topRight.justification = "right";
+                // this.text.topRight.fontSize = fontSize;
+                // this.text.topRight.fillColor = "black";
+                // this.text.topRight.content = width + "x" + height;
             };
         },
         // 임시 Mask 1개일때,
@@ -195,23 +208,15 @@ export default{
 
             let imageLayer = new this.paper.Layer(); // 이미지를 그릴 레이어
             let mask1Layer = new this.paper.Layer(); // 마스크를 그릴 레이어
-            // let mask2Layer = new this.paper.Layer(); // 마스크를 그릴 레이어
-            // let mask3Layer = new this.paper.Layer(); // 마스크를 그릴 레이어
 
             this.paper.activate();
-            // this.image.raster = new this.paper.Raster(this.image.url);
-            const img = new Image();
+            this.image.raster = new this.paper.Raster();
 
             // 이미지 로드가 완료된 후 실행되는 콜백 함수
-            img.onLoad = () => {
+            this.image.raster.onLoad = () => {
                 console.log("Image Onloaded")
-                this.image.raster = new this.paper.Raster(mask1Image);
-                this.image.raster.opacity = 1;
                 imageLayer.addChild(this.image.raster);
-                
-
-                this.imageSize.width = this.image.raster.width;
-                this.imageSize.height = this.image.raster.height;
+                this.image.raster.opacity = 1;
 
 
                 // 마스크1 이미지 생성
@@ -220,7 +225,7 @@ export default{
                 mask1Image.onload = () => {
                     console.log("Mask1 Onloaded")
                     this.maskRaster[0] = new this.paper.Raster(mask1Image);
-                    this.maskRaster[0].opacity = 0;
+                    this.maskRaster[0].opacity = this.switchList[0] ? 0.5 : 0;
 
                     mask1Layer.addChild(this.maskRaster[0]);
 
@@ -233,53 +238,13 @@ export default{
                     this.image.ratio = (this.imageSize.width * this.imageSize.height) / 1000000;
                 };
 
-                // 마스크2 이미지 생성
-                // const mask2Image = new Image();
-
-                // mask2Image.onload = () => {
-                //     console.log("Mask2 Onloaded")
-                //     this.maskRaster[1] = new this.paper.Raster(mask2Image);
-                //     this.maskRaster[1].opacity = 0;
-
-                //     mask2Layer.addChild(this.maskRaster[1]);
-
-                //     imageLayer.position = new this.paper.Point(0, 0);
-                //     mask2Layer.position = new this.paper.Point(0, 0);
-
-                //     this.image.raster.sendToBack();
-                //     this.maskRaster[1].sendToBack();
-                //     this.fit();
-                //     this.image.ratio = (this.imageSize.width * this.imageSize.height) / 1000000;
-                // };
-
-                // 마스크3 이미지 생성
-                // const mask3Image = new Image();
-
-                // mask3Image.onload = () => {
-                //     console.log("Mask1 Onloaded")
-                //     this.maskRaster[2] = new this.paper.Raster(mask3Image);
-                //     this.maskRaster[2].opacity = 0;
-
-                //     mask3Layer.addChild(this.maskRaster[2]);
-
-                //     imageLayer.position = new this.paper.Point(0, 0);
-                //     mask3Layer.position = new this.paper.Point(0, 0);
-
-                //     this.image.raster.sendToBack();
-                //     this.maskRaster[2].sendToBack();
-                //     this.fit();
-                //     this.image.ratio = (this.imageSize.width * this.imageSize.height) / 1000000;
-                // };
-
                 const mask1Data = this.mask2png(this.InferenceData.mask[0].data_base64Decoded, this.ColorHEX2RGB(this.colorList[0]))
-                // const mask2Data = this.mask2png(this.InferenceData.mask[1].data_base64Decoded, this.ColorHEX2RGB(this.colorList[1]))
-                // const mask3Data = this.mask2png(this.InferenceData.mask[2].data_base64Decoded, this.ColorHEX2RGB(this.colorList[2]))
                 mask1Image.src = mask1Data;
-                img.src = 'data:image/jpeg;base64,' + this.inferenceInfo.base64_encoded
-                // mask2Image.src = mask2Data;
-                // mask3Image.src = mask3Data;
 
             };
+
+            this.image.raster.source = 'data:image/jpeg;base64,' + this.InferenceData.base64_encoded;
+
         },
 
         // 임시 Mask 2개일때,
@@ -294,19 +259,15 @@ export default{
             let imageLayer = new this.paper.Layer(); // 이미지를 그릴 레이어
             let mask1Layer = new this.paper.Layer(); // 마스크를 그릴 레이어
             let mask2Layer = new this.paper.Layer(); // 마스크를 그릴 레이어
-            // let mask3Layer = new this.paper.Layer(); // 마스크를 그릴 레이어
 
             this.paper.activate();
-            this.image.raster = new this.paper.Raster(this.image.url);
+            this.image.raster = new this.paper.Raster();
 
             // 이미지 로드가 완료된 후 실행되는 콜백 함수
             this.image.raster.onLoad = () => {
-                console.log("Image Onloaded: ", this.image.url)
+                console.log("Image Onloaded")
                 imageLayer.addChild(this.image.raster);
                 this.image.raster.opacity = 1;
-
-                this.imageSize.width = this.image.raster.width;
-                this.imageSize.height = this.image.raster.height;
 
 
                 // 마스크1 이미지 생성
@@ -315,7 +276,7 @@ export default{
                 mask1Image.onload = () => {
                     console.log("Mask1 Onloaded")
                     this.maskRaster[0] = new this.paper.Raster(mask1Image);
-                    this.maskRaster[0].opacity = 0;
+                    this.maskRaster[0].opacity = this.switchList[0] ? 0.5 : 0;
 
                     mask1Layer.addChild(this.maskRaster[0]);
 
@@ -333,7 +294,7 @@ export default{
                 mask2Image.onload = () => {
                     console.log("Mask2 Onloaded")
                     this.maskRaster[1] = new this.paper.Raster(mask2Image);
-                    this.maskRaster[1].opacity = 0;
+                    this.maskRaster[1].opacity = this.switchList[1] ? 0.5 : 0;
 
                     mask2Layer.addChild(this.maskRaster[1]);
 
@@ -346,80 +307,15 @@ export default{
                     this.image.ratio = (this.imageSize.width * this.imageSize.height) / 1000000;
                 };
 
-                // 마스크3 이미지 생성
-                // const mask3Image = new Image();
-
-                // mask3Image.onload = () => {
-                //     console.log("Mask1 Onloaded")
-                //     this.maskRaster[2] = new this.paper.Raster(mask3Image);
-                //     this.maskRaster[2].opacity = 0;
-
-                //     mask3Layer.addChild(this.maskRaster[2]);
-
-                //     imageLayer.position = new this.paper.Point(0, 0);
-                //     mask3Layer.position = new this.paper.Point(0, 0);
-
-                //     this.image.raster.sendToBack();
-                //     this.maskRaster[2].sendToBack();
-                //     this.fit();
-                //     this.image.ratio = (this.imageSize.width * this.imageSize.height) / 1000000;
-                // };
-
                 const mask1Data = this.mask2png(this.InferenceData.mask[0].data_base64Decoded, this.ColorHEX2RGB(this.colorList[0]))
                 const mask2Data = this.mask2png(this.InferenceData.mask[1].data_base64Decoded, this.ColorHEX2RGB(this.colorList[1]))
-                // const mask3Data = this.mask2png(this.InferenceData.mask[2].data_base64Decoded, this.ColorHEX2RGB(this.colorList[2]))
                 mask1Image.src = mask1Data;
                 mask2Image.src = mask2Data;
-                // mask3Image.src = mask3Data;
-
             };
+
+            this.image.raster.source = 'data:image/jpeg;base64,' + this.InferenceData.base64_encoded;
         },
 
-
-        // initCanvas_with_Mask() {
-        //     let canvas = document.getElementById("editor");
-        //     this.paper.setup(canvas);
-        //     this.canvasSize.width = canvas.offsetWidth
-        //     this.canvasSize.height = canvas.offsetHeight
-        //     this.paper.view.viewSize = [
-        //         canvas.offsetWidth, canvas.offsetHeight
-        //     ];
-
-
-        //     let imageLayer = new paper.Layer(); // 이미지를 그릴 레이어
-        //     let mask1Layer = new paper.Layer(); // 마스크를 그릴 레이어
-
-
-        //     this.paper.activate();
-        //     this.image.raster = new paper.Raster(this.image.url);
-
-        //     const maskImage1 = new Image();
-        //     maskImage1.src = this.mask1.url;
-
-        //     this.image.raster.onLoad = () => {
-        //         imageLayer.addChild(this.image.raster)
-        //         this.image.raster.opacity = 1
-
-        //         let width = this.image.raster.width;
-        //         let height = this.image.raster.height;
-
-        //         this.mask1.raster = new paper.Raster(this.mask1.url);
-
-        //         this.mask1.raster.onLoad = () => {
-        //             mask1Layer.addChild(this.mask.raster)
-        //             this.mask1.raster.opacity = 0;
-
-        //             imageLayer.position = new paper.Point(0, 0);
-        //             mask1Layer.position = new paper.Point(0, 0);
-
-        //             this.image.raster.sendToBack();
-        //             this.mask1.raster.sendToBack();
-        //             this.fit();
-        //             this.image.ratio = (width * height) / 1000000;
-        //             this.mask1.ratio = (width * height) / 1000000;
-        //         }
-        //     };
-        // },
 
         mask2png(data_binary, color_ref){
             // console.log(color_ref)
@@ -482,10 +378,6 @@ export default{
                 (canvas.width / parentX) * 0.95,
                 (canvas.height / parentY) * 0.8
             );
-            // console.log("canvas.width: ", canvas.width)
-            // console.log("canvas.height: ", canvas.height)
-            // console.log("parentX: ", parentX)
-            // console.log("parentY: ", parentY)
 
 
             this.image.scale = 1 / this.paper.view.zoom;
@@ -563,7 +455,9 @@ export default{
 
         // this.image.url = this.InferenceData.image_path2
         // this.mask1.url = this.image_meta.maskpath
-        console.log("created")
+
+        this.imageSize.width = this.InferenceData.width
+        this.imageSize.height = this.InferenceData.height
     },
 
     mounted() {

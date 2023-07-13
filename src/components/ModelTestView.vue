@@ -365,7 +365,7 @@ export default{
             this.setupSocket3()
             // this.state = "done"
         },
-        
+
         // Socket (WebSocket 사용)
         setupSocket2() {
             console.log("setupSocket2")
@@ -692,9 +692,9 @@ export default{
                     return
                 }
 
-                output.image_path1 = rawData.image_filename
-                console.log("binaryImage")
-                console.log(output.image_binary)
+                output.image_path1 = rawData.filename
+                // console.log("binaryImage")
+                // console.log(output.image_binary)
 
                 // test
                 // output.image_path2 = "/project/" + rawData.image_path.split('/')[7]
@@ -775,7 +775,8 @@ export default{
         ////////// 이미지 확대 모달 //////////
         OpenZoomImageModal(index) {
             console.log("OpenZoomImageModal index: ", index)
-            console.log("selectedImage: ", this.InferenceData[index].image_path2)
+            console.log("selectedImage: ", this.InferenceData[index].image_path1)
+            console.log(this.InferenceData[index])
             this.SelectedImage = this.InferenceData[index]
 
             this.letFocusImage = true;

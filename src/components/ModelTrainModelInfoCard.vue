@@ -89,10 +89,21 @@ export default{
                 }).then( data => {
                     console.log(data)
                 if(data.status == '200'){
+                    this.post_stop_monitoring()
                     alert("[임시] deploy 요청 완료");
                     this.$router.go();
                 }
-                });
+            });
+        },
+        post_stop_monitoring() {
+            let project_id = this.$store.state.project.id
+            // fetch("http://183.105.120.175:30007/main_application/stop", {
+            fetch(this.API_List.monitoring_stop + project_id, {
+                method: "POST",
+                headers: {
+                "Content-Type": "application/json",
+                },
+            });
         },
         ClickButtonDelete() {
             fetch(this.API_List.delete_model + this.modelInfo.id, {
