@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from "vue-router";
 import HomeView from "../views/HomeView.vue";
 import LoginView from "../views/LoginView.vue";
+import LoginCallbackView from "../views/LoginCallbackView.vue";
 import MyPageView from "../views/MyPageView2.vue";
 import ProjectMainView from "../views/ProjectMainView.vue";
 import AnnotatorView from "../components/AnnotatorView.vue";
@@ -15,6 +16,11 @@ const routes = [
     path: "/",
     name: "Login",
     component: LoginView,
+  },
+  {
+    path: "/callback",
+    name: "LoginCallback",
+    component: LoginCallbackView,
   },
   {
     path: "/mypage",

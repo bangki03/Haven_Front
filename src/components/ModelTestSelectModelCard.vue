@@ -81,7 +81,7 @@ export default{
                 this.val_score_fixed = "-"
             }
             else{
-                this.val_score_fixed = (this.modelInfo.val_score * 100).toFixed(2) + "%"
+                this.val_score_fixed = (this.modelInfo.val_score * 100).toFixed(2)
             }
         },
     },

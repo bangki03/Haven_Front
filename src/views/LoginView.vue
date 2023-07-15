@@ -10,18 +10,24 @@
         style="height: 58.9px; width: 176px; padding: 0;"
       />
       <p style="margin-left: auto; margin-right:0.5em; height: 1.5rem; margin-bottom: 0; cursor: pointer;" @mouseenter="showrevision = true" @mouseleave="showrevision = false">
-        Version : A.11 / Relase Date : 23.07.14 01:00</p>
+        Version : A.12 / Relase Date : 23.07.15 10:00</p>
       <div v-if=showrevision class="revision">
         <br>
-        Version : A.11<br>
-        Relase Date : 23.07.14 01:00 <br>
+        Version : A.12<br>
+        Relase Date : 23.07.15 10:00<br>
+        <br>
+        [LoginView]<br>
+        - 회원가입 시, 이름 사라지는 버그 개선<br>
         <br>
         [TrainView]<br>
-        - deploy 버튼 클릭 시, application stop 요청<br>
-        <br>
+        - 모델 정확도 표기 수정<br>
+          └ 표기명: 정확도 → 성능<br>
+          └ '%' 제거<br>
+
         [TestView]<br>
-        - 검증 요청 시, 전송하는 이미지 정보 변경에 따른 검증 결과 수정 완료<br>
-        - Mask스위치 Default 값 변경 (Off -> On)<br>
+        - 모델 정확도 표기 수정<br>
+          └ 표기명: 정확도 → 성능<br>
+          └ '%' 제거<br>
         <br>
       </div>
     </div>

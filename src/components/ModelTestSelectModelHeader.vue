@@ -8,7 +8,7 @@
         <p style="font-family: Poppins-SemiBold; font-size:0.5rem; margin-top:auto; margin-bottom: 0em; grid-column: 6 / span 2;">학습진행률</p>
         <p style="font-family: Poppins-SemiBold; font-size:0.5rem; margin-top:auto; margin-bottom: 0em;">학습상태</p>
         <p style="font-family: Poppins-SemiBold; font-size:0.5rem; margin-top:auto; margin-bottom: 0em;">배포상태</p>
-        <p style="font-family: Poppins-SemiBold; font-size:0.5rem; margin-top:auto; margin-bottom: 0em;">정확도</p>
+        <p style="font-family: Poppins-SemiBold; font-size:0.5rem; margin-top:auto; margin-bottom: 0em;">성능</p>
 
     </div>
 

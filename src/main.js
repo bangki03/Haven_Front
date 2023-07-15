@@ -9,6 +9,12 @@ import Loading from "vue-loading-overlay";
 // import VueTouch from 'vue-touch'
 import VueAwesomePaginate from "vue-awesome-paginate";
 
+// import GAuth from "vue-google-oauth2"
+// const gauthOption = {
+//     clientId: '669331276233-gvtjd1fbgfccs72mh72v8ghlkijfdjc2.apps.googleusercontent.com',
+//     scope: 'profile email openid',
+//   }
+
 
 import "bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";

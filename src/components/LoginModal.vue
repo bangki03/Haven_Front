@@ -3,33 +3,42 @@
       <div style="width:60%;">
 
         <div v-if="!registerActive" class="login" v-bind:class="{ error: emptyFields }">
-        <h1 style="color: #BD7C4A">로그인</h1>
-        <form class="form-group" @submit.prevent="doLogin">
-          <input id="login_id" :value="prop_account.Email" @input="prop_account.Email = $event.target.value" type="email" @blur="saveInputValue" class="form-control" placeholder="이메일" required>
-          <input id="login_password" :value="prop_account.Password" @input="prop_account.Password = $event.target.value" @blur="saveInputValue" type="password" class="form-control" placeholder="비밀번호" required>
-          <input type="submit" class="btn" value="로그인" style="background-color: #BD7C4A; color:white;">
+          <h1 style="color: #BD7C4A">로그인</h1>
+          <!-- <div style="display:flex; flex-direction: row; align-items: center; border-width:1px; border-radius: 0.5rem; border-color: #CED4DA; border-style: solid;">
+            <img src="/assets/Login/Google/btn_google_light_normal_ios.svg">
+            <p style="color: #CED4DA; font-size:1.5rem; margin: 0rem 0.5rem;">Google로 로그인하기</p>
+          </div> -->
+          <!-- <img src="/assets/Login/Google/btn_google_signin_light_normal_web@2x.png" style="margin-left:auto; margin-right:auto; transform: scale(0.7); cursor:pointer;" @click="login_Google">
+          <img src="/assets/Login/Naver/btnG_official.png" style="margin-left:auto; margin-right:auto; transform: scale(0.2); cursor:pointer;"> -->
 
-          <p><a href="#" @click="registerActive = !registerActive, emptyFields = false">회원가입</a>
-          </p>
-        </form>
-      </div>
+          <!-- <button @click="login_Google">Login with Google</button> -->
 
-      <div v-else class="register" v-bind:class="{ error: emptyFields }">
-        <h1 style="color: #BD7C4A">회원가입</h1>
-        <form class="form-group" @submit.prevent="doRegister">
-        <!-- <form class="form-group"> -->
-          <input id="register_id" :value="prop_account.Email" @input="prop_account.Email = $event.target.value" @blur="saveInputValue" type="email" class="form-control" placeholder="이메일" required>
-          <input id="register_name" :value="prop_account.Name" @input="prop_account.EmaNameil = $event.target.value" @blur="saveInputValue" type="name" class="form-control" placeholder="이름" required>
-          <input id="register_password" :value="prop_account.Password" @input="prop_account.Password = $event.target.value" @blur="saveInputValue" type="password" class="form-control" placeholder="비밀번호" required>
-          <input id="register_passwordconfirm" :value="prop_account.Password_confirm" @input="prop_account.Password_confirm = $event.target.value" @blur="saveInputValue" type="password" class="form-control" placeholder="비밀번호 확인" required>
-          <input id="register_phonenNo" :value="prop_account.PhoneNumber" @input="prop_account.PhoneNumber = $event.target.value" @blur="saveInputValue" type="tel" class="form-control" placeholder="휴대폰 번호(010-OOOO-OOOO)" required>
-          <!-- <input type="submit" class="btn btn-primary" @click="doRegister"> -->
-          <input type="submit" class="btn" value="가입하기" style="background-color: #BD7C4A; color:white;">
+          <!-- <div style="background-color: #CED4DA; width:100%; height:1px; margin: 0.5rem 0rem 1.5rem 0rem;"></div> -->
+          <form class="form-group" @submit.prevent="doLogin">
+            <input id="login_id" :value="prop_account.Email" @input="prop_account.Email = $event.target.value" type="email" @blur="saveInputValue" class="form-control" placeholder="이메일" required>
+            <input id="login_password" :value="prop_account.Password" @input="prop_account.Password = $event.target.value" @blur="saveInputValue" type="password" class="form-control" placeholder="비밀번호" required>
+            <input type="submit" class="btn" value="로그인" style="background-color: #BD7C4A; color:white;">
+            <p><a href="#" @click="registerActive = !registerActive, emptyFields = false">회원가입</a></p>
+          </form>
 
-          <p>계정이 이미 있으시다면? <a href="#" @click="registerActive = !registerActive, emptyFields = false">로그인</a>
-          </p>
-        </form>
-      </div>
+        </div>
+
+        <div v-else class="register" v-bind:class="{ error: emptyFields }">
+          <h1 style="color: #BD7C4A">회원가입</h1>
+          <form class="form-group" @submit.prevent="doRegister">
+          <!-- <form class="form-group"> -->
+            <input id="register_id" :value="prop_account.Email" @input="prop_account.Email = $event.target.value" @blur="saveInputValue" type="email" class="form-control" placeholder="이메일" required>
+            <input id="register_name" :value="prop_account.Name" @input="prop_account.Name = $event.target.value" @blur="saveInputValue" type="name" class="form-control" placeholder="이름" required>
+            <input id="register_password" :value="prop_account.Password" @input="prop_account.Password = $event.target.value" @blur="saveInputValue" type="password" class="form-control" placeholder="비밀번호" required>
+            <input id="register_passwordconfirm" :value="prop_account.Password_confirm" @input="prop_account.Password_confirm = $event.target.value" @blur="saveInputValue" type="password" class="form-control" placeholder="비밀번호 확인" required>
+            <input id="register_phonenNo" :value="prop_account.PhoneNumber" @input="prop_account.PhoneNumber = $event.target.value" @blur="saveInputValue" type="tel" class="form-control" placeholder="휴대폰 번호(010-OOOO-OOOO)" required>
+            <!-- <input type="submit" class="btn btn-primary" @click="doRegister"> -->
+            <input type="submit" class="btn" value="가입하기" style="background-color: #BD7C4A; color:white;">
+
+            <p>계정이 이미 있으시다면? <a href="#" @click="registerActive = !registerActive, emptyFields = false">로그인</a>
+            </p>
+          </form>
+        </div>
 
       </div>
 
@@ -89,6 +98,15 @@ export default{
         this.reg_account.PhoneNumber = event.target.value
       }
 
+    },
+    login_Google() {
+      const clientId = '669331276233-gvtjd1fbgfccs72mh72v8ghlkijfdjc2.apps.googleusercontent.com';
+      const redirectUri = 'http://localhost:8080/callback';
+      const scope = 'openid email profile';
+
+      const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=token&scope=${scope}`;
+
+      window.location.href = authUrl;
     },
     doLogin() {
         if (this.prop_account.email === "" || this.prop_account.password === "") {
